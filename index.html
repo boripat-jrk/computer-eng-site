@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4) | ห้องเรียนออนไลน์ ครูบริพัฒน์</title>
+<meta name="description" content="Code Quest ห้องเรียนออนไลน์รายวิชาเตรียมวิศวกรรมคอมพิวเตอร์ ม.4 โรงเรียนกัลยาณวัตร เรียน Python ผ่านการสร้างเกม เลือกสายของตัวเอง เก็บ XP และเหรียญ">
+<meta name="theme-color" content="#0B2E5C">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="cq">
+<section class="hero hero3 cq-hero">
+  <div class="wrap hero-in">
+    <div>
+      <span class="eyebrow cq-eb"><i data-lucide="sparkles"></i>BEGIN YOUR JOURNEY</span>
+      <h1>Code Quest <span>ผจญภัยไปในโลกของ Python</span></h1>
+      <p class="lead tagline">ทุกตำนานเริ่มจากโค้ดบรรทัดแรก ฝึกวิชา ปราบบอส แล้วสร้างเกมของตัวเอง</p>
+      <div class="cq-chips"><span>🐍 Python</span><span>🎮 เกม</span><span>🎨 กราฟิก</span><span>🤖 AI</span><span>🔧 Arduino</span></div>
+      <div class="row"><a class="btn gold lg" id="startBtn" href="lesson.html?id=1"><i data-lucide="play"></i>PRESS START</a><a class="btn ghost lg" href="#paths"><i data-lucide="compass"></i>เลือกสายของฉัน</a></div>
+      <div class="hero-stats"><div><b>6</b><span>โลก</span></div><div><b>12</b><span>เควสหลัก</span></div><div><b>4</b><span>สายให้เลือก</span></div><div><b>90</b><span>นาทีต่อเควส</span></div></div>
+    </div>
+    <div class="hero-art cq-art" aria-hidden="true">
+      <div class="orbit"></div>
+      <div class="float cq-code"><div class="cq-bar"><i></i><i></i><i></i><span>quest.py</span></div><pre><b>hero</b> = <em>"ฉัน"</em>
+<b>while</b> slime_hp > 0:
+    slime_hp -= attack
+<u>print</u>(<em>"ชนะแล้ว!"</em>)</pre></div>
+      <div class="float cq-map"><span>🗺️</span><div><b>แผนที่ 6 โลก</b><small>ฝึกวิชา → สนามประลอง → ศึกบอส</small></div></div>
+      <div class="float cq-fest"><span>🎪</span><div><b>เทศกาลเกม</b><small>เปิดบูทให้เพื่อนเล่นเกมของเรา</small></div></div>
+      <div class="float h3-ic i1">🐍</div><div class="float h3-ic i2">🎮</div><div class="float h3-ic i3">🤖</div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap mystrip"><div class="card" id="mystrip"></div></div>
+<div class="wrap"><div class="card quests" id="quests"></div></div>
+<div class="wrap" id="announce"></div>
+
+<section class="blk" id="units"><div class="wrap">
+  <div class="sec-head"><div><span class="kicker">World map</span><h2>แผนที่โลก</h2><p>6 โลก • 12 เควสหลัก • เควสจะเปิดตามลำดับการเรียนในแต่ละสัปดาห์</p></div></div>
+  <div class="cq-road" id="unitList"></div>
+</div></section>
+
+<section class="blk" id="paths" style="padding-top:0"><div class="wrap">
+  <div class="sec-head"><div><span class="kicker">Choose your path</span><h2>เลือกสายของฮีโร่</h2><p>ทุกสายทำเควสหลักชุดเดียวกันและได้ XP เท่ากัน สายที่เลือกกำหนดเควสรองและลูกเล่นในเกมของตัวเอง</p></div><a class="btn ghost" href="sidequests.html"><i data-lucide="compass"></i>ดูเควสรองทั้งหมด</a></div>
+  <div class="cq-paths" id="pathList"></div>
+</div></section>
+
+<section class="blk" style="padding-top:0"><div class="wrap">
+  <div class="sec-head"><div><span class="kicker">How it works</span><h2>หนึ่งเควส จบใน 90 นาที</h2><p>ทุกเควสมีจังหวะเดียวกัน ทำชิ้นงานระดับ 1 ดาวเสร็จก็ถือว่าผ่านเควส</p></div></div>
+  <div class="cq-loop">
+    <div class="card"><b>10</b><small>นาที</small><h4>เปิดฉาก</h4><p>ฉากเรื่องของเควส และโจทย์อุ่นเครื่อง 1 ข้อ</p></div>
+    <div class="card"><b>15</b><small>นาที</small><h4>สำรวจ</h4><p>รันและแก้โค้ดตัวอย่างก่อนเรียนไวยากรณ์</p></div>
+    <div class="card"><b>10</b><small>นาที</small><h4>สรุปแนวคิด</h4><p>สรุปสั้นจากสิ่งที่เพิ่งลอง</p></div>
+    <div class="card"><b>40</b><small>นาที</small><h4>ลงมือ</h4><p>สร้างชิ้นงานบน Google Colab เลือกความท้าทายได้ถึง 3 ดาว</p></div>
+    <div class="card"><b>15</b><small>นาที</small><h4>ปิดฉาก</h4><p>แบบทดสอบ 5 ข้อ E-Ticket และโชว์ผลงาน</p></div>
+  </div>
+  <div class="cq-safe card"><span>🛡️</span><div><b>ห้องนี้คือพื้นที่ปลอดภัย</b><p>ลองผิดได้ ทำเควสซ้ำได้โดยไม่เสียคะแนน บั๊กคือเรื่องปกติของคนเขียนโค้ด และทุกคนมีจังหวะการเรียนรู้ของตัวเอง</p></div></div>
+</div></section>
+
+<section class="blk" style="padding-top:0"><div class="wrap">
+  <div class="sec-head"><div><span class="kicker">Student menu</span><h2>เมนูสำหรับนักเรียน</h2></div></div>
+  <div class="links" id="quickLinks"></div>
+</div></section>
+
+<section class="blk" style="padding-top:0"><div class="wrap">
+  <div class="card" style="padding:28px">
+    <div class="sec-head" style="margin-bottom:12px"><div><span class="kicker">About this course</span><h2>เกี่ยวกับรายวิชา</h2></div></div>
+    <div class="grid2">
+      <div>
+        <h3>คำอธิบายรายวิชา</h3>
+        <p>ศึกษาและฝึกปฏิบัติการเขียนโปรแกรมภาษาไพทอนบน Google Colab ตั้งแต่ที่มา ความสามารถ และประโยชน์ของภาษา การใช้ตัวแปร การรับและแสดงผล เงื่อนไข การวนซ้ำ ลิสต์ และฟังก์ชัน ฝึกแก้โจทย์ปัญหาบนระบบตรวจอัตโนมัติ TOI-Zero ออกแบบและพัฒนาเกมที่เล่นได้จริง ทดสอบและปรับปรุงร่วมกับเพื่อน นำเสนอผลงาน และเลือกเรียนรู้เพิ่มเติมตามสายที่สนใจ ได้แก่ การสร้างเกม ปัญญาประดิษฐ์ ไมโครคอนโทรลเลอร์ และความปลอดภัยไซเบอร์ เพื่อเตรียมพื้นฐานสู่การเรียนต่อด้านวิศวกรรมคอมพิวเตอร์</p>
+        <div class="box"><b>รูปแบบการเรียน</b> สัปดาห์ละ 1 ครั้ง ครั้งละ 90 นาที • งานเดี่ยว 5 เควส งานคู่และกลุ่ม 4 เควส เลือกเอง 1 เควส และทั้งห้อง 2 เควส</div>
+      </div>
+      <div><h3>ผลการเรียนรู้</h3><div id="indList"></div></div>
+    </div>
+  </div>
+</div></section>
+
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script>
+<script>
+addEventListener('DOMContentLoaded', () => {
+  T2.boot('home');
+  const L = COURSE.links;
+  document.getElementById('quickLinks').innerHTML = [
+    ['profile.html','medal','#F59E0B','#FFD54A','โปรไฟล์และเหรียญ','XP • ระดับ • เหรียญตรา'],
+        [L.score,'clipboard-list','#059669','#4ADE80','ตรวจสอบคะแนน','คะแนนเก็บและผลการเรียน'],
+    [L.classroom,'school','#16A34A','#86EFAC','Google Classroom','ส่งงานและประกาศ'],
+    [L.drive,'folder-open','#2D4FD6','#7FA0FF','คลังสื่อ Google Drive','ไฟล์ประกอบการเรียน'],
+    [L.colab,'notebook-pen','#D97706','#FDBA74','Google Colab','เขียนและรัน Python'],['sidequests.html','compass','#7C3AED','#C084FC','เควสรองตามสาย','เลือกทำตามความสนใจ'],[L.py101,'graduation-cap','#BE185D','#F9A8D4','Python 101 (จุฬาฯ)','บทเรียนและวิดีโอภาษาไทย'],
+    [L.main,'globe','#0EA5E9','#7DD3FC','เว็บหลัก boripat.com','ครูบริพัฒน์'],
+    ['leaderboard.html','route','#0FA3B1','#7DE3EA','กระดานการเดินทาง','ดูว่าทั้งห้องเดินทางถึงไหนแล้ว'],['#units','map','#DB2777','#F9A8D4','แผนที่โลก','6 โลก 12 เควสหลัก']
+  ].map(x => `<a class="card lnk" href="${x[0]}" ${x[0].startsWith('http')?'target="_blank" rel="noopener"':''}><span class="tile" style="--c1:${x[3]};--c2:${x[2]}"><i data-lucide="${x[1]}"></i></span><span><b>${x[4]}</b><small>${x[5]}</small></span></a>`).join('');
+  const SQ = window.SIDE_QUESTS || {};
+  const pathRender = () => { const mine = (T2.state.hero || {}).cls;
+    document.getElementById('pathList').innerHTML = Object.entries(HERO_CLASSES).map(([k, c]) => `<a class="card cq-path ${mine === k ? 'mine' : ''}" style="--uc:${c.c1}" href="sidequests.html#${k}">
+      <span class="cq-av">${heroSVG({ cls: k, skin: 0, style: 0, hc: 0 }, 0, 84)}</span>${mine === k ? '<em class="cq-mine">สายของฉัน</em>' : ''}
+      <h3>${c.name}</h3><small>${c.th}</small><p>${c.desc}</p>
+      <ul>${(SQ[k] || { q: [] }).q.map(x => `<li>${x.t}</li>`).join('')}</ul><b class="cq-go">ดูเควสรอง →</b></a>`).join(''); };
+  document.getElementById('indList').innerHTML = Object.entries(INDICATORS).map(([k,v]) => `<div class="ind"><b>${k}</b><span>${v}</span></div>`).join('');
+
+  const render = () => {
+    const s = T2.state, lv = T2.level(T2.xp());
+    const done = Object.keys(s.done).length;
+    const next = LESSONS.find(l => l.ready && !s.done['l'+l.id]) || LESSONS[0];
+    document.getElementById('startBtn').href = 'lesson.html?id=' + next.id;
+    const hc = T2.heroClass(), dq = T2.daily();
+    if (T2.guest()) {
+      document.getElementById('mystrip').innerHTML = `<div class="guest-card"><span class="g-em">👀</span><div><h3>กำลังเข้าชมแบบผู้เยี่ยมชม</h3><small class="muted">เปิดอ่านเควสที่เปิดแล้วได้ทุกเควส • ไม่บันทึกและไม่แสดงคะแนน</small></div><button class="btn gold" onclick="T2.login()"><i data-lucide="log-in"></i>เข้าสู่ระบบเพื่อสร้างฮีโร่</button></div>`;
+      document.getElementById('quests').style.display = 'none';
+    } else document.getElementById('quests').style.display = '';
+    if (!T2.guest()) document.getElementById('mystrip').innerHTML = `
+      <a href="profile.html" class="big-lv hero-ring">${T2.avatar(76)}<span class="lvb">Lv.${lv.i + 1}</span></a>
+      <div><h3>${s.nick ? (s.hero ? hc.name + ' ' : '') + T2.esc(s.nick) + ' ⚔️' : 'ยินดีต้อนรับ ผู้กล้า! สร้างฮีโร่แล้วเริ่มผจญภัยกัน'}</h3>
+        <small class="muted">${lv.cur.icon} <b>${lv.cur.name}</b>${lv.next ? ` • อีก ${lv.next.xp - T2.xp()} XP สู่ Lv.${lv.i + 2} “${lv.next.name}”` : ''}</small>
+        <div class="bar"><i style="width:${lv.pct}%"></i></div>
+        <button class="btn sm gold wd-btn" data-wardrobe>🎨 อัปเกรดตัวละคร <span class="wd-cnt"></span></button>
+        <a href="profile.html" class="cmp-mini" title="สมรรถนะสำคัญของผู้เรียน">${heroComp(s).map(x => `<span title="${x.full}: ${x.lvName}" style="--c:${x.color}">${x.icon}<i style="width:${x.pct}%"></i></span>`).join('')}</a></div>
+      <div class="stat"><b>${T2.xp()}</b><span>XP</span></div>
+      <div class="stat"><b>${done}/${LESSONS.length}</b><span>เควสที่สำเร็จ</span></div>`;
+    if (!T2.guest()) document.getElementById('quests').innerHTML = `<div class="q-head"><h3>🗡️ ภารกิจประจำวัน</h3><small class="muted">รีเซ็ตทุกวัน • ทำครบรับหีบสมบัติ +${DAILY_CHEST} XP</small></div>
+      <div class="q-list">${DAILY.map((q, i) => { const n = Math.min(q.need, dq[q.k] || 0), ok = dq.got.includes(i);
+        return `<div class="q-item ${ok ? 'ok' : ''}"><span class="q-ic">${ok ? '✅' : q.icon}</span><div><b>${q.name}</b><div class="bar"><i style="width:${n / q.need * 100}%"></i></div></div><small>${n}/${q.need} • +${q.xp} XP</small></div>`; }).join('')}
+      <div class="q-item chest-item ${dq.chest ? 'ok' : ''}"><span class="q-ic">${dq.chest ? '🎉' : '🎁'}</span><div><b>หีบสมบัติประจำวัน</b><small class="muted">${dq.got.length}/${DAILY.length} ภารกิจ</small></div><small>+${DAILY_CHEST} XP</small></div></div>`;
+    const nextId = (LESSONS.find(l => l.ready && !s.done['l' + l.id]) || {}).id;
+    document.getElementById('unitList').innerHTML = UNITS.map(u => {
+      const ls = LESSONS.filter(l => l.unit === u.n);
+      const ud = ls.filter(l => s.done['l'+l.id]).length;
+      return `<div class="cq-world" style="--uc:${u.color}">
+        <div class="cq-wh"><span class="tile"><i data-lucide="${u.icon}"></i></span><div><small>โลกที่ ${u.n} • ${u.strand}</small><h3>${u.title}</h3></div><span class="uprog">${ud}/${ls.length} เควส ${ud === ls.length ? '🏅' : ''}</span></div>
+        <div class="cq-nodes">${ls.map(l => {
+          const p = T2.lessonProgress(l.id); const d = s.done['l'+l.id];
+          return `<a class="cq-node ${l.ready ? '' : 'soon'} ${d ? 'done' : ''} ${l.id === nextId ? 'now' : ''}" href="lesson.html?id=${l.id}">
+            <span class="cq-dot"><i data-lucide="${d ? 'check' : l.ready ? l.icon : 'lock'}"></i></span>
+            <div class="cq-nb"><div class="num">เควส ${ACT(l.id)} • ${l.date}</div><h4>${l.title}</h4>
+              <p>🎒 ${l.task}</p>
+              <div class="cq-tags"><span>👥 ${l.mode}</span>${l.star3 ? `<span>⭐⭐⭐ ${l.star3}</span>` : ''}</div>
+              ${l.ready ? `<div class="lp"><i style="width:${p}%"></i></div>` : ''}</div>
+            <span class="cq-st">${d ? '✓ จบแล้ว' : l.ready ? (l.id === nextId ? 'เริ่มเควส →' : p + '%') : 'ยังไม่เปิด'}</span></a>`;
+        }).join('')}</div></div>`;
+    }).join('');
+    pathRender();
+    T2.icons();
+  };
+  const ann = () => { const box = document.getElementById('announce'), L = T2.anns ? T2.anns() : [];
+    box.innerHTML = L.map(c => `<div class="announce ${c.level === 'urgent' ? 'urgent' : ''}"><i data-lucide="${c.pin ? 'pin' : 'megaphone'}"></i><div><b>${T2.esc(c.title || 'ประกาศจากครู')}${T2.isTeacher() ? ` <span class="an-tg">${T2.esc(T2.annTarget(c))}</span>` : ''}</b><p>${T2.esc(c.text).replace(/\n/g, '<br>')}</p>${c.at ? `<small>${new Date(c.at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })}${c.until ? ' • ถึง ' + new Date(c.until).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) : ''}</small>` : ''}</div></div>`).join(''); T2.icons(); };
+  T2.on(render); render(); T2.on(ann); ann();
+});
+</script>
+</body>
+</html>

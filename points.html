@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>แต้มสะสม | Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4)</title>
+<meta name="theme-color" content="#0B2E5C">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="pt-page">
+<main class="wrap pt-wrap" id="pt"><p class="muted">กำลังโหลด...</p></main>
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script>
+<script>
+addEventListener('DOMContentLoaded',()=>{T2.boot('points');
+const E=s=>T2.esc(s==null?'':String(s)),$=s=>document.querySelector(s),box=$('#pt');
+const RS=k=>(k[0]==='m'?PT_MINUS:PT_REASONS)[+k.slice(1)];
+const dt=t=>new Date(t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const dayKey=t=>new Date(t+7*36e5).toISOString().slice(0,10);
+let tab=sessionStorage.getItem('pt-tab')||'give',room=sessionStorage.getItem('pt-room')||ROOMS[0],sel=new Set(),amt=1,why='p6',mode='p',mini=localStorage.getItem('pt-mini')==='1';
+let D=null,loading=false,whyTxt=''; /* ครู: {users, bonus, roster, plain} */
+
+/* ================= นักเรียน ================= */
+let roomPts=null;
+const loadRoomPts=async()=>{try{const {db,collection,getDocs}=T2.fb;const s=await getDocs(collection(db,'board'));const r={};s.forEach(d=>{const x=d.data();if(!ROOMS.includes(x.room))return;r[x.room]=r[x.room]||{p:0,n:0};r[x.room].p+=x.pt||0;r[x.room].n++;});roomPts=r;}catch(e){roomPts={};}draw();};
+const compCard=()=>{const L=T2.plog||[],sum={};L.forEach(x=>{if(x.pts>0&&x.c&&x.c!=='RULE')sum[x.c]=(sum[x.c]||0)+x.pts;});const mx=Math.max(1,...Object.values(sum));const minus=L.filter(x=>x.c==='RULE'&&x.pts<0);
+ return `<div class="card pt-compc"><h3 class="pt-h3">แต้มตามสมรรถนะของฉัน</h3><div class="pt-comps">${Object.entries(PT_COMP).filter(([k])=>k!=='RULE').map(([k,c])=>`<div class="pt-cp" style="--c:${c.c}"><span>${c.em}</span><div><b>${c.t}</b><div class="pt-bar"><i style="width:${(sum[k]||0)/mx*100}%;background:${c.c}"></i></div></div><em>${sum[k]||0}</em></div>`).join('')}</div>${minus.length?`<p class="muted" style="margin:10px 0 0;font-size:14px">📏 ถูกหักตามข้อตกลงห้องเรียน ${minus.length} ครั้ง • ปรับปรุงแล้วครูคืนแต้มให้ได้</p>`:''}</div>`};
+const student=()=>{
+ if(!T2.user){box.innerHTML=`<div class="pt-empty card"><div class="big-emoji">🌟</div><h2>แต้มสะสม</h2><p class="muted">แต้มจากการตอบคำถาม การมีส่วนร่วม และรหัสรับแต้มที่ครูแจกในห้องเรียน</p><button class="btn gold" onclick="T2.login()"><i data-lucide="log-in"></i>เข้าสู่ระบบเพื่อดูแต้มของฉัน</button></div>`;return;}
+ const s=T2.state,cl=s.claims||{},codes=T2.codes();
+ const hist=[...(T2.plog||[]).map(x=>({at:x.at,p:x.pts,t:x.note||'แต้มจากครู',k:'ครูให้'})),...Object.entries(cl).map(([h,at])=>({at,p:(codes[h]||{}).pts||0,t:(codes[h]||{}).note||'รหัสรับแต้ม',k:'รหัส'}))].sort((a,b)=>b.at-a.at);
+ const today=hist.filter(x=>dayKey(x.at)===dayKey(Date.now())).reduce((a,x)=>a+x.p,0);
+ const rr=ROOMS.map(r=>({r,p:(roomPts&&roomPts[r]||{}).p||0})),mx=Math.max(1,...rr.map(x=>x.p));
+ box.innerHTML=`<div class="pt-head"><div><small class="kick">CLASSROOM POINTS</small><h1>แต้มสะสม</h1><p class="muted">${E(s.room||'')} ${s.no?'• เลขที่ '+E(s.no):''}</p></div></div>
+ <div class="pt-grid2"><div class="card pt-me"><span class="pt-av">${T2.avatar(64)}</span><div><small>แต้มของฉัน</small><b class="pt-big">${T2.myPts()}</b><small>${today?`วันนี้ +${today}`:'วันนี้ยังไม่มีแต้มใหม่'}</small></div></div>
+ <div class="card pt-code"><small>รับแต้มด้วยรหัสจากครู</small><form id="rdF" class="pt-in"><input id="rdC" maxlength="12" placeholder="เช่น K7Q2M" autocomplete="off" autocapitalize="characters"><button class="btn gold">รับแต้ม</button></form><div id="rdMsg" class="pt-msg"></div></div></div>
+ <div class="pt-grid2"><div class="card"><h3 class="pt-h3">ประวัติแต้ม</h3>${hist.length?`<div class="pt-hist">${hist.slice(0,40).map(x=>`<div><b class="${x.p<0?'neg':''}">${x.p>0?'+':''}${x.p}</b><span>${E(x.t)}<small>${x.k} • ${dt(x.at)}</small></span></div>`).join('')}</div>`:'<p class="muted">ยังไม่มีแต้ม เริ่มสะสมได้จากการมีส่วนร่วมในห้องเรียน</p>'}</div>
+ <div class="card"><h3 class="pt-h3">แต้มรวมแต่ละห้อง</h3>${roomPts?rr.sort((a,b)=>b.p-a.p).map(x=>`<div class="pt-room ${x.r===s.room?'me':''}"><b>${x.r}</b><div class="pt-bar"><i style="width:${x.p/mx*100}%"></i></div><span>${x.p}</span></div>`).join(''):'<p class="muted">กำลังโหลด...</p>'}</div></div>${compCard()}`;
+ $('#rdF').onsubmit=async e=>{e.preventDefault();const m=$('#rdMsg');m.className='pt-msg';m.textContent='กำลังตรวจรหัส...';const r=await T2.redeem($('#rdC').value);
+  if(r.ok){T2.confetti(70);T2.toast(`🌟 +${r.pts} แต้ม`,r.note);roomPts=null;loadRoomPts();}else{m.className='pt-msg err';m.textContent=r.m;}};
+ if(!roomPts&&T2.fb)loadRoomPts();
+};
+
+/* ================= ครู ================= */
+const loadT=async()=>{const {db,collection,getDocs,doc,getDoc}=T2.fb;const g=async c=>(await getDocs(collection(db,c))).docs;
+ const [u,b,r]=await Promise.all([g('users'),g('bonus'),g('roster')]);const bonus={};b.forEach(d=>bonus[d.id]=d.data());const roster={};r.forEach(d=>roster[d.id]=d.data());
+ D={users:u.map(d=>Object.assign({id:d.id},d.data())).filter(x=>!TEACHER_EMAILS.includes((x.email||'').toLowerCase())),bonus,roster,plain:(bonus._codes||{}).list||[]};
+ D.users.forEach(x=>{const rr=roster[(x.email||'').toLowerCase()]||{};x._room=rr.room||x.room||'-';x._no=+(rr.no||x.no)||999;x._name=rr.name||x.name||'';x._nick=rr.nickname||x.nickname||'';});draw();};
+const tot=u=>T2.ptsOf(D.bonus[u.id],u.claims);
+const nameOf=u=>T2.rnOn()?`${E(u._name||'-')}${u._nick?` (${E(u._nick)})`:''}`:'';
+const give=async()=>{const r=RS(why),n=+amt,note=(whyTxt.trim()||r[2]),comp=r[0];if(!sel.size){T2.toast('ยังไม่ได้เลือกนักเรียน','แตะชื่อนักเรียนเพื่อเลือก','err');return;}
+ const ids=[...sel],{db,doc,setDoc}=T2.fb,at=Date.now();$('#giveB').disabled=true;
+ try{await Promise.all(ids.map(async id=>{const u=D.users.find(x=>x.id===id),cur=D.bonus[id]||{};const pt=(cur.pt||0)+n,plog=[...(cur.plog||[]),{pts:n,note,at,c:comp}].slice(-80);
+  await setDoc(doc(db,'bonus',id),{pt,plog,email:u.email||''},{merge:true});D.bonus[id]=Object.assign({},cur,{pt,plog});
+  try{await setDoc(doc(db,'board',id),{pt:T2.ptsOf(D.bonus[id],u.claims)},{merge:true});}catch(e){}}));
+  T2.toast(`${n>0?'+':''}${n} แต้ม • ${ids.length} คน`,note);sel.clear();}catch(e){T2.toast('บันทึกไม่สำเร็จ',e.code||'','err');}
+ draw();};
+const giveTab=()=>{const L=D.users.filter(u=>u._room===room).sort((a,b)=>a._no-b._no);
+ return `<div class="tabs pt-rooms">${ROOMS.map(r=>`<button data-room="${r}" class="${r===room?'on':''}">${r} <small>${D.users.filter(u=>u._room===r).length}</small></button>`).join('')}</div>
+ <div class="row pt-tools"><button class="btn sm ghost" data-selall>เลือกทั้งห้อง</button><button class="btn sm ghost" data-clr>ล้างที่เลือก</button><input class="pt-num" id="ptNum" inputmode="numeric" autocomplete="off" placeholder="พิมพ์เลขที่ แล้วกด Enter" title="เลือกหลายคนได้ เช่น 3,7,12 หรือ 5-9"><button class="btn sm ghost ${T2.rnOn()?'on':''}" data-rn>👤 ชื่อจริง ${T2.rnOn()?'เปิด':'ปิด'}</button><span class="muted">รวมห้อง ${L.reduce((a,u)=>a+tot(u),0)} แต้ม</span></div>
+ ${L.length?`<div class="pt-stu">${L.map(u=>`<button class="pt-s ${sel.has(u.id)?'on':''}" data-s="${u.id}"><span class="pt-no">${u._no<999?u._no:'-'}</span>${heroSVG(u.hero,0,40)}<span class="pt-n"><b>${E(u.nick||'ยังไม่ตั้งชื่อฮีโร่')}</b>${nameOf(u)?`<small class="rn">${nameOf(u)}</small>`:''}</span><em>${tot(u)}</em></button>`).join('')}</div>`:'<p class="muted">ยังไม่มีนักเรียนห้องนี้เข้าใช้งาน</p>'}
+ ${sel.size?'':'<div class="pt-hintbar">👆 แตะชื่อนักเรียนเพื่อเปิดแผงให้แต้ม</div>'}<div class="pt-bar-give card ${mode==='m'?'minus':''} ${mini?'mini':''} ${sel.size?'':'hide'}"><button class="pt-x" data-clr title="ปิดแผงให้แต้ม">✕</button><button class="pt-mini" data-mini title="${mini?'ขยายแผง':'ย่อแผงเพื่อเลือกชื่อ'}">${mini?'▴ ขยาย':'▾ ย่อ'}</button><div class="pt-mode"><button class="${mode==='p'?'on':''}" data-mode="p">➕ ให้แต้มตาม 6 สมรรถนะ</button><button class="${mode==='m'?'on':''}" data-mode="m">➖ ข้อตกลงห้องเรียน</button></div><div class="pt-why">${mode==='p'?Object.entries(PT_COMP).filter(([k])=>k!=='RULE').map(([k,c])=>`<div class="pt-cg" style="--c:${c.c}"><small title="${c.t}">${c.em} ${c.t}</small>${PT_REASONS.map((r,i)=>r[0]===k?`<button class="chip ${'p'+i===why?'on':''}" data-why="p${i}">${r[2]} <i>+${r[1]}</i></button>`:'').join('')}</div>`).join(''):PT_MINUS.map((r,i)=>`<button class="chip ${'m'+i===why?'on':''} ${r[1]<0?'neg':''}" data-why="m${i}">${r[2]} <i>${r[1]>0?'+':''}${r[1]}</i></button>`).join('')}</div><div class="pt-why2"><input id="whyC" maxlength="40" value="${E(whyTxt)}" placeholder="หรือพิมพ์เหตุผลเอง"></div>
+ <div class="pt-amt">${(mode==='m'?[-1,-2,-3,1]:[1,2,3,5]).map(n=>`<button class="${n===amt?'on':''} ${n<0?'neg':''}" data-amt="${n}">${n>0?'+':''}${n}</button>`).join('')}<button class="btn ${amt<0?'danger':'gold'}" id="giveB">${amt<0?'หักแต้ม':'ให้แต้ม'} ${sel.size?sel.size+' คน':''}</button></div></div>`;};
+const codeTab=()=>{const now=Date.now(),cnt={};D.users.forEach(u=>Object.keys(u.claims||{}).forEach(h=>cnt[h]=(cnt[h]||0)+1));
+ const list=[...D.plain].sort((a,b)=>b.at-a.at);
+ return `<div class="card pt-new"><h3 class="pt-h3">สร้างรหัสรับแต้ม</h3><div class="pt-form">
+ <label>แต้ม<select id="cP">${[1,2,3,5,10].map(n=>`<option>${n}</option>`).join('')}</select></label>
+ <label>กิจกรรม / เหตุผล<input id="cN" maxlength="40" placeholder="เช่น ตอบคำถามท้ายคาบ"></label>
+ <label>ห้อง<select id="cR"><option value="">ทุกห้อง</option>${ROOMS.map(r=>`<option ${r===room?'selected':''}>${r}</option>`).join('')}</select></label>
+ <label>ใช้ได้ถึง<select id="cE"><option value="1">1 ชั่วโมง</option><option value="d" selected>สิ้นวันนี้</option><option value="7">7 วัน</option></select></label>
+ <label>แบบ<select id="cT"><option value="share">รหัสเดียวทั้งห้อง (คนละครั้ง)</option><option value="one">บัตรรายคน (1 รหัส = 1 คน)</option></select></label>
+ <label id="cQw">จำนวนบัตร<input id="cQ" type="number" min="1" max="60" value="10"></label></div>
+ <button class="btn gold" id="cMake">สร้างรหัส</button></div>
+ <div class="card"><h3 class="pt-h3">รหัสทั้งหมด</h3>${list.length?`<table class="board pt-ctab"><tr><th>รหัส</th><th>แต้ม</th><th>กิจกรรม</th><th>ห้อง</th><th>ใช้แล้ว</th><th>หมดเวลา</th><th></th></tr>${list.slice(0,80).map(c=>{const m=T2.codes()[c.h]||{},dead=m.off||(m.exp&&now>m.exp);return `<tr class="${dead?'dead':''}"><td><b class="pt-cd">${E(c.code)}</b>${m.one?' <small class="tag">1 คน</small>':''}</td><td>${m.pts||c.pts}</td><td>${E(m.note||'')}</td><td>${E(m.room||'ทุกห้อง')}</td><td>${cnt[c.h]||0}</td><td><small>${m.exp?dt(m.exp):'-'}</small></td><td><button class="btn sm ghost" data-off="${c.h}">${m.off?'เปิด':'ปิด'}</button></td></tr>`}).join('')}</table>
+ <div class="row" style="margin-top:12px"><button class="btn sm" data-print="live">🖨️ พิมพ์รหัสที่ยังใช้ได้</button></div>`:'<p class="muted">ยังไม่มีรหัส</p>'}</div>`;};
+const dayTab=()=>{const d=sessionStorage.getItem('pt-day')||dayKey(Date.now()),codes=T2.codes();
+ const rows=D.users.map(u=>{const b=D.bonus[u.id]||{};const g=(b.plog||[]).filter(x=>dayKey(x.at)===d).reduce((a,x)=>a+x.pts,0);const c=Object.entries(u.claims||{}).filter(([h,at])=>dayKey(at)===d).reduce((a,[h])=>a+((codes[h]||{}).pts||0),0);return {u,g,c,t:g+c};}).filter(x=>x.t);
+ return `<div class="row pt-tools"><label>วันที่ <input type="date" id="dD" value="${d}"></label><button class="btn sm ghost" data-csv>⬇ ดาวน์โหลด CSV</button></div>
+ ${ROOMS.map(r=>{const R=rows.filter(x=>x.u._room===r).sort((a,b)=>a.u._no-b.u._no);return `<div class="card"><h3 class="pt-h3">${r} <small class="muted">${R.length} คน • รวม ${R.reduce((a,x)=>a+x.t,0)} แต้ม</small></h3>${R.length?`<table class="board"><tr><th>เลขที่</th><th>นักเรียน</th><th>ครูให้</th><th>รหัส</th><th>รวมวันนี้</th><th>สะสม</th></tr>${R.map(x=>`<tr><td>${x.u._no<999?x.u._no:'-'}</td><td><b>${E(x.u._nick||x.u.nick||'')}</b> <small class="muted">${E(x.u._name||'')}</small></td><td>${x.g}</td><td>${x.c}</td><td><b>${x.t}</b></td><td>${tot(x.u)}</td></tr>`).join('')}</table>`:'<p class="muted">ไม่มีแต้มในวันนี้</p>'}</div>`}).join('')}`;};
+const teacher=()=>{if(!D){box.innerHTML='<p class="muted">กำลังโหลดข้อมูลนักเรียน...</p>';if(!loading){loading=true;loadT().catch(e=>{box.innerHTML='<p class="muted">โหลดข้อมูลไม่สำเร็จ '+E(e.code||'')+'</p>';});}return;}
+ box.innerHTML=`<div class="pt-head"><div><small class="kick">CLASSROOM POINTS • ครู</small><h1>แต้มสะสม</h1><p class="muted">แยกจาก XP • นักเรียนเห็นแต้มของตนเองและแต้มรวมของห้อง</p></div>
+ <div class="pt-tabs">${[['give','ให้แต้ม'],['code','รหัสรับแต้ม'],['day','สรุปรายวัน']].map(([k,t])=>`<button data-tab="${k}" class="${k===tab?'on':''}">${t}</button>`).join('')}</div></div>
+ ${tab==='give'?giveTab():tab==='code'?codeTab():dayTab()}`;
+ const q=$('#cT');if(q){const f=()=>$('#cQw').style.display=q.value==='one'?'':'none';q.onchange=f;f();}
+ const dd=$('#dD');if(dd)dd.onchange=()=>{sessionStorage.setItem('pt-day',dd.value);draw();};};
+
+const rand=n=>{const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';const r=crypto.getRandomValues(new Uint32Array(n));r.forEach(x=>s+=A[x%A.length]);return s;};
+const makeCodes=async()=>{const pts=+$('#cP').value,note=$('#cN').value.trim()||'กิจกรรมในห้องเรียน',rm=$('#cR').value,e=$('#cE').value,one=$('#cT').value==='one',n=one?Math.max(1,Math.min(60,+$('#cQ').value||1)):1;
+ const now=Date.now();let exp;if(e==='1')exp=now+36e5;else if(e==='7')exp=now+7*864e5;else{const d=new Date(now+7*36e5);d.setUTCHours(23,59,59,0);exp=d.getTime()-7*36e5;}
+ const add={},plain=[];for(let i=0;i<n;i++){const code=rand(5),h=await T2.hash(code);add[h]={pts,note,room:rm,exp,one,at:now};plain.push({code,h,pts,at:now});}
+ const {db,doc,setDoc}=T2.fb;$('#cMake').disabled=true;
+ try{await setDoc(doc(db,'config','app'),{codes:Object.assign({},T2.codes(),add)},{merge:true});D.plain=[...D.plain,...plain].slice(-400);await setDoc(doc(db,'bonus','_codes'),{list:D.plain},{merge:true});await T2.loadCfg();
+  T2.toast(`สร้างรหัสแล้ว ${n} รหัส`,`${pts} แต้ม • ${note}`);printCodes(plain);}catch(err){T2.toast('สร้างรหัสไม่สำเร็จ',err.code||'','err');}
+ draw();};
+const printCodes=list=>{const C=T2.codes(),w=open('','_blank');if(!w){T2.toast('เบราว์เซอร์บล็อกหน้าต่างพิมพ์','อนุญาตป๊อปอัปแล้วลองใหม่','err');return;}
+ w.document.write(`<!doctype html><meta charset="utf-8"><title>รหัสรับแต้ม</title><style>body{font-family:Kanit,Sarabun,sans-serif;margin:16px}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.c{border:2px dashed #94A3B8;border-radius:14px;padding:14px;text-align:center;break-inside:avoid}.c b{display:block;font-size:34px;letter-spacing:6px;font-family:monospace}.c small{color:#475569}h1{font-size:18px}@media print{button{display:none}}</style><h1>รหัสรับแต้ม • เทคโนโลยี 2 • technology-2.boripat.com/points.html</h1><button onclick="print()">พิมพ์</button><div class="g">${list.map(c=>{const m=C[c.h]||c;return `<div class="c"><small>🌟 ${m.pts} แต้ม • ${T2.esc(m.note||'')}</small><b>${c.code}</b><small>${m.room||'ทุกห้อง'} • ใช้ได้ถึง ${m.exp?dt(m.exp):'-'}</small></div>`}).join('')}</div>`);w.document.close();};
+const csv=()=>{const d=sessionStorage.getItem('pt-day')||dayKey(Date.now()),codes=T2.codes();const rows=[['ห้อง','เลขที่','ชื่อ-สกุล','ชื่อเล่น','ชื่อฮีโร่','ครูให้','รหัส','รวมวันนี้','สะสม']];
+ D.users.forEach(u=>{const b=D.bonus[u.id]||{};const g=(b.plog||[]).filter(x=>dayKey(x.at)===d).reduce((a,x)=>a+x.pts,0);const c=Object.entries(u.claims||{}).filter(([h,at])=>dayKey(at)===d).reduce((a,[h])=>a+((codes[h]||{}).pts||0),0);if(g+c)rows.push([u._room,u._no<999?u._no:'',u._name,u._nick,u.nick||'',g,c,g+c,tot(u)]);});
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n')],{type:'text/csv'}));a.download=`แต้มสะสม-${d}.csv`;a.click();};
+
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-tab],[data-room],[data-s],[data-selall],[data-clr],[data-mini],[data-why],[data-mode],[data-amt],#giveB,#cMake,[data-off],[data-print],[data-csv]');if(!t||!D)return;
+ if(t.dataset.tab){tab=t.dataset.tab;sessionStorage.setItem('pt-tab',tab);}
+ else if(t.dataset.room){room=t.dataset.room;sessionStorage.setItem('pt-room',room);sel.clear();}
+ else if(t.dataset.s){sel.has(t.dataset.s)?sel.delete(t.dataset.s):sel.add(t.dataset.s);}
+ else if(t.hasAttribute('data-selall')){D.users.filter(u=>u._room===room).forEach(u=>sel.add(u.id));}
+ else if(t.hasAttribute('data-clr')){sel.clear();}
+ else if(t.hasAttribute('data-mini')){mini=!mini;localStorage.setItem('pt-mini',mini?'1':'0');}
+ else if(t.dataset.why){why=t.dataset.why;whyTxt='';amt=RS(why)[1];}
+ else if(t.dataset.mode){mode=t.dataset.mode;why=mode==='m'?'m0':'p6';amt=RS(why)[1];}
+ else if(t.dataset.amt){amt=+t.dataset.amt;}
+ else if(t.id==='giveB'){return give();}
+ else if(t.id==='cMake'){return makeCodes();}
+ else if(t.dataset.off){const h=t.dataset.off,m=Object.assign({},T2.codes()[h]);m.off=!m.off;const {db,doc,setDoc}=T2.fb;await setDoc(doc(db,'config','app'),{codes:Object.assign({},T2.codes(),{[h]:m})},{merge:true});await T2.loadCfg();}
+ else if(t.dataset.print){const now=Date.now();printCodes(D.plain.filter(c=>{const m=T2.codes()[c.h]||{};return !m.off&&(!m.exp||m.exp>now);}));return;}
+ else if(t.hasAttribute('data-csv')){csv();return;}
+ draw();});
+document.addEventListener('input',e=>{if(e.target.id==='whyC')whyTxt=e.target.value;});
+document.addEventListener('keydown',e=>{if(e.target.id!=='ptNum'||e.key!=='Enter'||!D)return;e.preventDefault();const v=e.target.value.trim();if(!v)return;
+ const L=D.users.filter(u=>u._room===room),want=[],miss=[];v.split(/[ ,]+/).forEach(t=>{const m=t.match(/^(\d+)\s*-\s*(\d+)$/);if(m){for(let i=+m[1];i<=+m[2];i++)want.push(i)}else if(/^\d+$/.test(t))want.push(+t)});
+ want.forEach(n=>{const u=L.find(x=>+x._no===n);if(u)sel.add(u.id);else miss.push(n)});if(miss.length)T2.toast('ไม่พบเลขที่ '+miss.join(', '),'นักเรียนอาจยังไม่เข้าใช้งาน','err');
+ draw();const i=document.getElementById('ptNum');if(i){i.value='';i.focus();}});
+const draw=()=>{if(!T2.ready)return;if(T2.isTeacher())teacher();else student();T2.icons();const gb=document.querySelector('.pt-bar-give:not(.hide)');document.body.style.paddingBottom=gb?(gb.offsetHeight+40)+'px':'';};
+T2.on(draw);draw();});
+</script>
+</body>
+</html>

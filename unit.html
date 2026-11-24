@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>แบบทดสอบประจำหน่วย | Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4)</title>
+<meta name="theme-color" content="#0B2E5C">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="cq">
+<div class="lhero" id="uhero"><div class="wrap"><div class="crumb"><a href="index.html">หน้าแรก</a> › <a href="index.html#units">หน่วยการเรียน</a> › <span id="ucrumb">หน่วยการเรียนรู้</span></div><h1 id="utitle">หน่วยการเรียนรู้</h1><div class="tags" id="utags"></div><div class="big-ico" id="uico"><i data-lucide="map"></i></div></div></div>
+<div class="wrap" style="margin-top:-40px;position:relative;z-index:2;padding-bottom:60px" id="upage"><p class="muted">กำลังโหลด...</p></div>
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/widgets.js?v=20261124cq2"></script><script src="js/w2.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script>
+<script>
+addEventListener('DOMContentLoaded',()=>{T2.boot('units');
+const n=+new URLSearchParams(location.search).get('u')||1,u=UNITS.find(x=>x.n===n)||UNITS[0],I=UNIT_INFO[u.n]||{},spec=UNIT_TESTS[u.n],E=s=>T2.esc(s==null?'':String(s)),pg=document.getElementById('upage');
+document.title=`หน่วยที่ ${u.n} ${u.short} | ${COURSE.short}`;
+document.getElementById('utitle').textContent=`หน่วยที่ ${u.n} ${u.title}`;document.getElementById('ucrumb').textContent=`หน่วยที่ ${u.n}`;
+document.getElementById('uhero').style.setProperty('--uc',u.color);document.getElementById('uico').innerHTML=`<i data-lucide="${u.icon}"></i>`;
+document.getElementById('utags').innerHTML=`<span>🗺️ โลกที่ ${u.n}</span><span>📚 ${u.strand}</span><span>⏱️ ${u.hours} ชั่วโมง</span><span>⭐ ${u.pts} คะแนน</span>`;
+const ls=LESSONS.filter(l=>l.unit===u.n),inds=[...new Set(ls.flatMap(l=>l.ind))];
+const load=id=>new Promise(r=>{const s=document.createElement('script');s.src=`js/lessons/l${id}.js?v=20261124cq2`;s.onload=()=>r(window.LESSON);s.onerror=()=>r(null);document.head.appendChild(s);});
+const nav=()=>{const i=UNITS.indexOf(u),p=UNITS[i-1],x=UNITS[i+1];return `<div class="u-nav">${p?`<a class="btn ghost" href="unit.html?u=${p.n}">← หน่วยที่ ${p.n} ${E(p.short)}</a>`:'<span></span>'}${x?`<a class="btn ghost" href="unit.html?u=${x.n}">หน่วยที่ ${x.n} ${E(x.short)} →</a>`:''}</div>`};
+let built=false;
+const draw=()=>{if(!T2.ready)return;const s=T2.state,done=ls.filter(l=>(s.done||{})['l'+l.id]).length,open=spec&&T2.unitOpen(u.n),best=(s.quiz||{})['u'+u.n];
+ pg.innerHTML=`<div class="card u-ov" style="--uc:${u.color}"><div class="u-q"><small>คำถามชวนคิด</small><h2>${E(I.q||u.title)}</h2><p>${E(I.d||'')}</p>${I.r?`<div class="u-real">${I.r.map(x=>`<span>📍 ${E(x)}</span>`).join('')}</div>`:''}</div>
+  <div class="u-side"><div class="u-prog"><b>${done}/${ls.length}</b><span>กิจกรรมที่เรียนจบ</span><div class="bar"><i style="width:${done/ls.length*100}%"></i></div></div>${best!=null?`<div class="u-prog"><b>${best}/10</b><span>แบบทดสอบประจำหน่วย</span></div>`:''}</div></div>
+ <div class="u-grid"><div class="card u-card"><h3>🎯 เป้าหมายการเรียนรู้ของหน่วยนี้</h3><ul class="u-out">${(I.o||[]).map(x=>`<li>${E(x)}</li>`).join('')}</ul></div>
+  <div class="card u-card"><h3>📏 ตัวชี้วัด</h3>${inds.map(k=>`<div class="ind"><b>${k}</b><span>${E(INDICATORS[k]||'')}</span></div>`).join('')}</div></div>
+ <div class="card u-card"><h3>📚 เนื้อหาในหน่วย <small class="muted">${ls.length} กิจกรรม</small></h3><div class="u-ls">${ls.map(l=>{const p=T2.lessonProgress(l.id),d=(s.done||{})['l'+l.id];return `<a class="u-l ${l.ready?'':'soon'}" ${l.ready?`href="lesson.html?id=${l.id}"`:''}><span class="u-n">${l.id}</span><span class="u-lt"><small>สัปดาห์ที่ ${l.week} • ${l.hours} ชม. • ${l.pts} คะแนน</small><b>${E(l.title)}</b><em>🛠️ ${E(l.task)}</em></span><span class="u-st">${!l.ready?'🔒 เร็ว ๆ นี้':d?'<span class="pill done">✓ จบแล้ว</span>':`<span class="pill">${p}%</span>`}</span></a>`}).join('')}</div></div>
+ <div class="card lsec u-test" id="test"><h3>📝 แบบทดสอบประจำหน่วย</h3><div id="ubox">${!spec?'<p class="muted">แบบทดสอบของหน่วยนี้จะเปิดเมื่อกิจกรรมในหน่วยพร้อมครบ</p>':!open?'<div class="center"><div class="big-emoji">🔒</div><p>เปิดเมื่อเรียนครบทุกบทในหน่วย หรือเมื่อครูเปิดให้ทำ</p></div>':'<p class="muted">กำลังโหลดแบบทดสอบ...</p>'}</div></div>${nav()}`;
+ T2.icons();
+ if(open&&!built){built=true;(async()=>{const items=[];for(const [lid,idx] of spec.from){const L=await load(lid);if(L)idx.forEach(i=>L.quiz[i]&&items.push(L.quiz[i]));}items.push(...spec.extra);
+  const box=document.getElementById('ubox');box.innerHTML='<div data-w="unit"></div>';WIDGETS.quiz(box.querySelector('[data-w]'),{final:true,unit:true,lid:'u'+u.n,items,title:`แบบทดสอบประจำหน่วยที่ ${u.n}`,desc:`${items.length} ข้อ • ผ่านเมื่อถูก 7 ข้อ • ตัวช่วยตัดตัวเลือกได้ข้อละ 1 ครั้ง`},'u'+u.n);T2.icons();if(location.hash==='#test')document.getElementById('test').scrollIntoView();})();}
+};
+let first=true;T2.on(()=>{if(first&&T2.ready){first=false;draw();}});draw();if(T2.ready)first=false;
+});
+</script>
+</body>
+</html>

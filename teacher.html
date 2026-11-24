@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>เมนูครู | Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4)</title>
+<meta name="theme-color" content="#0B2E5C">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="cq">
+
+<div class="lhero"><div class="wrap"><div class="crumb"><a href="index.html">หน้าแรก</a> › เมนูครู</div><h1>เมนูครู</h1><div class="tags"><span>📊 ความคืบหน้า</span><span>👥 จัดการผู้ใช้</span><span>📚 เปิด–ปิดกิจกรรม</span><span>📣 ประกาศ</span></div><div class="big-ico"><i data-lucide="shield-check"></i></div></div></div>
+<div class="wrap" style="margin-top:-40px;position:relative;z-index:2;padding-bottom:60px"><div class="card lsec">
+  <nav class="atabs" id="atabs">
+    <a href="#progress" data-t="progress"><i data-lucide="gauge"></i>ความคืบหน้า</a>
+    <a href="#users" data-t="users"><i data-lucide="users"></i>จัดการผู้ใช้</a>
+    <a href="#faces" data-t="faces"><i data-lucide="scan-face"></i>รูปนักเรียน</a>
+    <a href="#lessons" data-t="lessons"><i data-lucide="book-open"></i>เปิด–ปิดเควส</a>
+    <a href="#eticket" data-t="eticket"><i data-lucide="ticket"></i>E-Ticket</a>
+    <a href="#announce" data-t="announce"><i data-lucide="megaphone"></i>ประกาศ & ตั้งค่า</a>
+  </nav>
+  <div id="panel"><p class="muted">กำลังตรวจสอบสิทธิ์...</p></div>
+</div></div>
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script>
+<script>
+addEventListener('DOMContentLoaded', () => {
+T2.boot('teacher');
+const P = document.getElementById('panel'), E = T2.esc;
+let tab = 'progress', room = 'ทั้งหมด', q = '';
+let users = null, bonus = {}, roster = {};
+const built = LESSONS.filter(l => l.built);
+const lowerMail = m => String(m || '').trim().toLowerCase();
+const fb = () => T2.fb;
+const ts = t => t ? new Date(t).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '-';
+const nn = u => u.nickname || (roster[lowerMail(u.email)] || {}).nickname || '';
+const totalXP = u => (u.xp || 0) + ((bonus[u.id] || {}).total || 0);
+
+/* ---------- โหลดข้อมูล ---------- */
+const load = async () => {
+  const { db, collection, getDocs } = fb();
+  const get = async c => { try { return (await getDocs(collection(db, c))).docs; } catch (e) { console.warn(c, e); return []; } };
+  const [u, b, r] = await Promise.all([get('users'), get('bonus'), get('roster')]);
+  users = u.map(d => Object.assign({ id: d.id }, d.data()));
+  bonus = {}; b.forEach(d => bonus[d.id] = d.data());
+  roster = {}; r.forEach(d => roster[d.id] = d.data());
+  draw();
+};
+const busy = async (fn, ok) => { try { await fn(); if (ok) T2.toast(ok); await load(); } catch (e) { console.error(e); T2.toast('ทำรายการไม่สำเร็จ', e.code || e.message || '', 'err'); } };
+
+/* ---------- แท็บ ---------- */
+const setTab = () => { tab = (location.hash || '#progress').slice(1); if (!['progress', 'users', 'faces', 'lessons', 'announce', 'eticket'].includes(tab)) tab = 'progress';
+  document.querySelectorAll('#atabs a').forEach(a => a.classList.toggle('on', a.dataset.t === tab)); draw(); };
+addEventListener('hashchange', setTab);
+
+const roomTabs = () => `<div class="tabs">${['ทั้งหมด', ...ROOMS].map(r => `<button class="${r === room ? 'on' : ''}" data-room="${r}">${r}</button>`).join('')}
+  <input id="q" placeholder="ค้นหาชื่อ / อีเมล" value="${E(q)}" style="margin-left:auto;padding:8px 12px;border-radius:10px;border:1.5px solid var(--line);font:14px var(--b);min-width:200px"></div>`;
+const bindRoomTabs = () => {
+  P.querySelectorAll('[data-room]').forEach(b => b.onclick = () => { room = b.dataset.room; draw(); });
+  const qi = P.querySelector('#q'); if (qi) qi.oninput = () => { q = qi.value; const pos = qi.selectionStart; draw(); const n = P.querySelector('#q'); n.focus(); n.setSelectionRange(pos, pos); };
+};
+const match = (o, extra = '') => !q || (`${o.nick || ''} ${o.nickname || ''} ${o.name || ''} ${o.email || ''} ${extra}`).toLowerCase().includes(q.toLowerCase());
+
+/* ---------- 1) ความคืบหน้า ---------- */
+const progList = () => (users || []).filter(u => (room === 'ทั้งหมด' || u.room === room) && match(u))
+  .sort((a, b) => (a.room || '').localeCompare(b.room || '') || (+a.no || 99) - (+b.no || 99));
+const drawProgress = () => {
+  const L = progList(); const avg = L.length ? Math.round(L.reduce((a, u) => a + totalXP(u), 0) / L.length) : 0;
+  const restrict = !!T2.cfg.restrict;
+  P.innerHTML = `${roomTabs()}
+  <div class="grid3" style="margin-bottom:16px"><div class="mini"><div class="em">👥</div><h4>${L.length} คน</h4><p>เข้าใช้งานแล้ว</p></div><div class="mini"><div class="em">⭐</div><h4>${avg} XP</h4><p>XP เฉลี่ย (รวม XP พิเศษ)</p></div><div class="mini"><div class="em">✅</div><h4>${L.reduce((a, u) => a + Object.keys(u.done || {}).length, 0)}</h4><p>จำนวนกิจกรรมที่เรียนจบรวม</p></div></div>
+  <div class="row" style="margin:0 0 10px"><small class="muted">กด 👁 ดูรายละเอียด • ✏️ แก้ชื่อ/ห้อง • 🏆 มอบ XP/เหรียญ • 🗑 ลบผู้ใช้</small><button class="btn sm ghost" id="csv" style="margin-left:auto"><i data-lucide="download"></i>ส่งออก CSV</button></div>
+  <div style="overflow:auto"><table class="board"><tr><th>ห้อง</th><th>เลขที่</th><th>ชื่อเล่น / ฮีโร่</th><th>บัญชี</th><th>XP</th><th>สมรรถนะ<br><small>${COMP_KEYS.map(k => COMPETENCIES[k].icon).join(' ')}</small></th>${built.map(l => `<th>บท ${l.id}</th>`).join('')}${Object.keys(UNIT_TESTS).map(n => `<th>สอบหน่วย ${n}</th>`).join('')}<th>ล่าสุด</th><th></th></tr>
+  ${L.map(u => { const inR = roster[lowerMail(u.email)]; const bx = (bonus[u.id] || {}).total || 0;
+    return `<tr><td>${E(u.room || '')}</td><td>${E(u.no || '')}</td><td><span class="lb-hero">${heroSVG(u.hero, lvOf(u), 34)}<span><b>${E(nn(u) || '-')}</b><small>⚔️ ${E(u.nick || '')}${u.hero && HERO_CLASSES[u.hero.cls] ? ' • ' + HERO_CLASSES[u.hero.cls].name : ''}${u.career ? ' • ' + careerOf(u.career, (u.hero || {}).g).em + ' ' + E(u.career) : ''}</small></span></span>${!u.nick ? '<span class="tag warn">ยังไม่ตั้งชื่อ</span>' : ''}</td>
+    <td><small>${E(u.name || '')}<br>${E(u.email || '')}</small>${restrict && !inR && !TEACHER_EMAILS.includes(lowerMail(u.email)) ? '<span class="tag no">ไม่อยู่ในรายชื่อ</span>' : ''}</td>
+    <td><b>${totalXP(u)}</b>${bx ? `<br><small class="muted">(${bx > 0 ? '+' : ''}${bx} พิเศษ)</small>` : ''}</td>
+    <td class="cmp-cell">${heroComp(u, (bonus[u.id] || {}).badges || []).map(x => `<span class="lv${x.lv}" title="${x.full}: ${x.lvName} (${x.v})">${x.lvIcon}</span>`).join('')}</td>
+    ${built.map(l => { const d = (u.done || {})['l' + l.id]; const qz = (u.quiz || {})['l' + l.id]; return `<td>${d ? '✅' : '⏳'} ${qz != null ? qz + (qz > 5 ? '/8' : '/5') : '-'}</td>`; }).join('')}${Object.keys(UNIT_TESTS).map(n => { const v = (u.quiz || {})['u' + n]; return `<td>${v != null ? (v >= 7 ? '✅ ' : '') + v + '/10' : '-'}</td>`; }).join('')}
+    <td><small>${ts(u.updated)}</small></td>
+    <td><span class="iact"><button title="รายละเอียด" data-a="view" data-id="${u.id}"><i data-lucide="eye"></i></button><button title="แก้ไข" data-a="edit" data-id="${u.id}"><i data-lucide="pencil"></i></button><button title="มอบ XP / เหรียญ" data-a="xp" data-id="${u.id}"><i data-lucide="star"></i></button><button class="del" title="ลบผู้ใช้" data-a="del" data-id="${u.id}"><i data-lucide="trash-2"></i></button></span></td></tr>`; }).join('')}
+  </table>${L.length ? '' : '<p class="muted center">ยังไม่มีนักเรียนเข้าใช้งานในห้องนี้</p>'}</div>`;
+  bindRoomTabs();
+  P.querySelector('#csv').onclick = () => csv(L);
+  P.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { const u = users.find(x => x.id === b.dataset.id); ({ view: viewUser, edit: editUser, xp: xpUser, del: delUser })[b.dataset.a](u); });
+};
+const csv = L => {
+  const head = ['ห้อง', 'เลขที่', 'ชื่อเล่น', 'ชื่อฮีโร่', 'ชื่อบัญชี', 'อีเมล', 'XP กิจกรรม', 'XP พิเศษ', 'XP รวม', ...COMP_KEYS.map(k => COMPETENCIES[k].full), ...built.flatMap(l => ['บท' + l.id + '_จบ', 'บท' + l.id + '_ทดสอบ'])];
+  const rows = L.map(u => [u.room, u.no, nn(u), u.nick, u.name, u.email, u.xp || 0, (bonus[u.id] || {}).total || 0, totalXP(u), ...heroComp(u, (bonus[u.id] || {}).badges || []).map(x => x.lvName + ' (' + x.v + ')'), ...built.flatMap(l => [(u.done || {})['l' + l.id] ? 1 : 0, (u.quiz || {})['l' + l.id] ?? ''])]);
+  const s = [head, ...rows].map(a => a.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + s], { type: 'text/csv' })); a.download = 'technology2-progress.csv'; a.click();
+};
+
+const viewUser = u => {
+  const b = bonus[u.id] || {};
+  const lessons = LESSONS.filter(l => l.built || (u.done || {})['l' + l.id]).map(l => {
+    const n = (window.LESSON_SECTIONS || {})[l.id] || 0; const read = Object.keys(u.sec || {}).filter(k => k.startsWith('l' + l.id + ':')).length;
+    const w = Object.keys(u.wid || {}).filter(k => k.startsWith('l' + l.id)).length; const qz = (u.quiz || {})['l' + l.id]; const d = (u.done || {})['l' + l.id];
+    return `<tr><td>${ACT(l.id)} ${E(l.title)}</td><td>${read}/${n}</td><td>${w}</td><td>${qz != null ? qz + '/8' : '-'}</td><td>${d ? '✅ ' + ts(d) : '⏳'}</td></tr>`; }).join('');
+  T2.modal(`<div class="row" style="gap:14px;align-items:center;margin:0">${heroSVG(u.hero, lvOf(u), 72)}<div><h3 style="margin:0">${E(nn(u) || '(ไม่มีชื่อเล่น)')} <small class="muted">⚔️ ${E(u.nick || '-')}</small> <small class="muted">${E(u.room || '')} เลขที่ ${E(u.no || '-')}</small></h3>
+    <p class="muted" style="margin:0">${u.hero && HERO_CLASSES[u.hero.cls] ? HERO_CLASSES[u.hero.cls].name + ' • ' : ''}${E(u.name || '')} • ${E(u.email || '')}</p></div></div>
+    <div class="dgrid"><div><small>XP รวม</small><b>${totalXP(u)}</b></div><div><small>XP พิเศษ</small><b>${b.total || 0}</b></div><div><small>เหรียญ</small><b>${(u.badges || []).length}</b></div>
+    <div><small>เรียนต่อเนื่อง</small><b>🔥 ${u.streak || 0}</b></div><div><small>รันโค้ด</small><b>${u.codeRuns || 0}</b></div><div><small>เข้าใช้ล่าสุด</small><b style="font-size:14px">${ts(u.updated)}</b></div></div>
+    <div class="cmp-wrap" style="margin:6px 0 10px"><div>${compRadar(heroComp(u, b.badges || []), 220)}</div><div class="cmp-list">${heroComp(u, b.badges || []).map(x => `<div class="cmp"><span class="cmp-ic">${x.icon}</span><div><div class="cmp-h"><b>${x.full}</b><span class="cmp-lv lv${x.lv}">${x.lvIcon} ${x.lvName}</span></div><div class="st-bar"><i style="width:${x.pct}%;background:${x.color}"></i></div></div><span class="st-v">${x.v}</span></div>`).join('')}</div></div>
+    <table class="board"><tr><th>กิจกรรมที่</th><th>หัวข้อที่อ่าน</th><th>กิจกรรมย่อย</th><th>ทดสอบ</th><th>สถานะ</th></tr>${lessons}</table>
+    <p><b>เหรียญ:</b> ${(u.badges || []).map(k => BADGES[k] ? `<span class="tag">${BADGES[k].icon} ${BADGES[k].name}</span>` : '').join('') || '-'}</p>
+    <p><b>เหรียญจากครู:</b> ${(b.badges || []).map(k => TEACHER_BADGES[k] ? `<span class="tag ok">${TEACHER_BADGES[k].icon} ${TEACHER_BADGES[k].name}</span>` : '').join('') || '-'}</p>
+    ${(b.log || []).length ? `<p><b>ประวัติ XP พิเศษ</b></p>${b.log.slice().reverse().map(x => `<div><span class="tag ${x.pts > 0 ? 'ok' : 'no'}">${x.pts > 0 ? '+' : ''}${x.pts}</span> ${E(x.note || '')} <small class="muted">${ts(x.at)}</small></div>`).join('')}` : ''}`, { cls: 'wide' });
+};
+
+const editUser = u => {
+  const m = T2.modal(`<h3>แก้ไขข้อมูลนักเรียน</h3><p class="muted">${E(u.email || '')}</p>
+    <label>ชื่อเล่นจริง<input id="eNN" maxlength="20" value="${E(nn(u))}"></label>
+    <label>ชื่อฮีโร่<input id="eN" maxlength="16" value="${E(u.nick || '')}"></label>
+    <label>ห้องเรียน<select id="eR">${ROOMS.map(r => `<option ${r === u.room ? 'selected' : ''}>${r}</option>`).join('')}</select></label>
+    <label>เลขที่<input id="eNo" type="number" min="1" max="60" value="${E(u.no || '')}"></label>
+    <button class="btn gold block" id="eS">บันทึก</button>`);
+  m.el.querySelector('#eS').onclick = () => { const nickname = m.el.querySelector('#eNN').value.trim(), nick = m.el.querySelector('#eN').value.trim(), rm = m.el.querySelector('#eR').value, no = +m.el.querySelector('#eNo').value || '';
+    m.close(); busy(async () => { const { db, doc, updateDoc, setDoc } = fb();
+      await updateDoc(doc(db, 'users', u.id), { nick, nickname, room: rm, no });
+      await setDoc(doc(db, 'board', u.id), { nick: nick || 'นักเรียน', room: rm }, { merge: true });
+      const em = lowerMail(u.email); if (roster[em]) await setDoc(doc(db, 'roster', em), { room: rm, no, nickname }, { merge: true });
+    }, 'บันทึกข้อมูลแล้ว'); };
+};
+
+const xpUser = u => {
+  const cur = bonus[u.id] || { total: 0, log: [], badges: [] }; const tb = new Set(cur.badges || []);
+  const m = T2.modal(`<h3>🏆 มอบรางวัลให้ฮีโร่</h3><div class="row" style="gap:12px;align-items:center;margin:0">${heroSVG(u.hero, lvOf(u), 56)}<div><b>${E(u.nick || u.email)}</b><br><small class="muted">${E(u.room || '')} • ตอนนี้ ${totalXP(u)} XP</small></div></div>
+    <span class="flabel" style="margin-top:14px">เหรียญคุณลักษณะอันพึงประสงค์ (กดเพื่อมอบ / ถอน • เพิ่มแต้มสมรรถนะ +15)</span>
+    <div class="tb-pick">${Object.entries(TEACHER_BADGES).map(([k, b]) => `<button data-b="${k}" class="${tb.has(k) ? 'on' : ''}" title="${E(b.desc)}"><span>${b.icon}</span>${b.name}<small>${(b.comp || []).map(c => COMPETENCIES[c].icon).join('')}</small></button>`).join('')}</div>
+    <span class="flabel" style="margin-top:14px">XP พิเศษ (ติดลบ = หัก)</span>
+    <div class="row" style="gap:6px;flex-wrap:wrap;margin:6px 0">${[5, 10, 20, 50, -5, -10].map(n => `<button class="btn sm ${n > 0 ? 'ghost' : ''}" style="${n < 0 ? 'background:#FEE2E2;color:#B91C1C' : ''}" data-n="${n}">${n > 0 ? '+' : ''}${n}</button>`).join('')}</div>
+    <div class="grid2" style="gap:10px"><input id="xN" type="number" value="0" class="atext" style="min-height:0"><input id="xW" maxlength="60" class="atext" style="min-height:0" placeholder="เหตุผล เช่น ตอบคำถามในห้อง"></div>
+    <button class="btn gold block" id="xS" style="margin-top:14px">บันทึกรางวัล</button>`);
+  m.el.querySelectorAll('[data-n]').forEach(b => b.onclick = () => m.el.querySelector('#xN').value = b.dataset.n);
+  m.el.querySelectorAll('[data-b]').forEach(b => b.onclick = () => { const k = b.dataset.b; tb.has(k) ? tb.delete(k) : tb.add(k); b.classList.toggle('on', tb.has(k)); });
+  m.el.querySelector('#xS').onclick = () => { const pts = Math.round(+m.el.querySelector('#xN').value || 0); const note = m.el.querySelector('#xW').value.trim();
+    const badges = [...tb]; const badgeChanged = badges.sort().join() !== [...(cur.badges || [])].sort().join();
+    if (!pts && !badgeChanged) { T2.toast('ยังไม่ได้เลือกรางวัล', 'ใส่ XP หรือเลือกเหรียญ', 'err'); return; } m.close();
+    busy(async () => { const { db, doc, setDoc } = fb();
+      const total = (cur.total || 0) + pts; const log = pts ? [...(cur.log || []), { pts, note, at: Date.now() }].slice(-50) : (cur.log || []);
+      await setDoc(doc(db, 'bonus', u.id), { total, log, badges, email: u.email || '' }, { merge: true });
+      const t = (u.xp || 0) + total; let lv = 0; LEVELS.forEach((l, k) => { if (t >= l.xp) lv = k; });
+      await setDoc(doc(db, 'board', u.id), { xp: t, level: lv, badges: (u.badges || []).length + badges.length }, { merge: true });
+    }, 'มอบรางวัลแล้ว'); };
+};
+const lvOf = u => { const t = totalXP(u); let lv = 0; LEVELS.forEach((l, k) => { if (t >= l.xp) lv = k; }); return lv; };
+
+const delUser = u => {
+  const em = lowerMail(u.email);
+  const m = T2.modal(`<h3 class="bad">ลบผู้ใช้</h3><p><b>${u.avatar || ''} ${E(u.nick || '')}</b> • ${E(u.email || '')}</p>
+    <p>ความคืบหน้า XP เหรียญ และคะแนนแบบทดสอบของนักเรียนคนนี้จะถูก<b>ลบถาวร กู้คืนไม่ได้</b> และจะหายจากกระดานอันดับ ถ้านักเรียนเข้าใช้อีกครั้งจะเริ่มจาก 0</p>
+    ${roster[em] ? `<label class="switch"><input type="checkbox" id="dR"> ลบออกจากรายชื่อนักเรียนด้วย (ถ้าเปิด "เฉพาะคนในรายชื่อ" จะเข้าใช้ไม่ได้อีก)</label>` : ''}
+    <label>พิมพ์ <b>ลบ</b> เพื่อยืนยัน<input id="dC" autocomplete="off"></label>
+    <button class="btn block" style="background:var(--bad)" id="dS"><i data-lucide="trash-2"></i>ลบผู้ใช้ถาวร</button>`);
+  m.el.querySelector('#dS').onclick = () => { if (m.el.querySelector('#dC').value.trim() !== 'ลบ') { T2.toast('พิมพ์คำว่า "ลบ" เพื่อยืนยัน', '', 'err'); return; }
+    const alsoR = (m.el.querySelector('#dR') || {}).checked; m.close();
+    busy(async () => { const { db, doc, deleteDoc, setDoc } = fb();
+      await setDoc(doc(db, 'removed', u.id), { at: Date.now(), email: u.email || '' });
+      await Promise.all(['users', 'board', 'bonus'].map(c => deleteDoc(doc(db, c, u.id))));
+      if (alsoR) await deleteDoc(doc(db, 'roster', em));
+    }, 'ลบผู้ใช้แล้ว'); };
+};
+
+/* ---------- 2) จัดการผู้ใช้ / รายชื่อ ---------- */
+const drawUsers = () => {
+  const byEmail = {}; (users || []).forEach(u => byEmail[lowerMail(u.email)] = u);
+  const R = Object.entries(roster).map(([id, r]) => Object.assign({ id }, r)).filter(r => (room === 'ทั้งหมด' || r.room === room) && match(r, r.id))
+    .sort((a, b) => (a.room || '').localeCompare(b.room || '') || (+a.no || 99) - (+b.no || 99));
+  const outsideAll = (users || []).filter(u => !roster[lowerMail(u.email)] && !TEACHER_EMAILS.includes(lowerMail(u.email)));
+  const outside = outsideAll.filter(u => (room === 'ทั้งหมด' || u.room === room) && match(u)).sort((a, b) => String(a.room || '').localeCompare(String(b.room || '')) || (+a.no || 999) - (+b.no || 999));
+  const joined = R.filter(r => byEmail[r.id]).length;
+  P.innerHTML = `<div class="apanel">
+  <h3><i data-lucide="lock"></i>การเข้าใช้งาน</h3>
+  <label class="switch"><input type="checkbox" id="restrict" ${T2.cfg.restrict ? 'checked' : ''}> ให้เข้าใช้ได้เฉพาะนักเรียนที่อยู่ในรายชื่อ</label>
+  <div class="note">${T2.cfg.restrict ? '🔒 <b>เปิดอยู่</b> — บัญชีที่ไม่อยู่ในรายชื่อจะล็อกอินได้แต่ใช้งานและบันทึกคะแนนไม่ได้ (ครูเข้าได้เสมอ)' : '🔓 <b>ปิดอยู่</b> — ใครมีบัญชี Google ก็เข้าใช้และบันทึกคะแนนได้'} • ถ้าเพิ่มรายชื่อไว้ ระบบจะเติมห้องและเลขที่ให้นักเรียนอัตโนมัติ</div>
+
+  <h3 style="margin-top:22px"><i data-lucide="user-plus"></i>เพิ่มนักเรียน</h3>
+  <div class="aform"><div><span class="flabel">อีเมล</span><input id="aE" placeholder="xxxxx@kw.ac.th"></div>
+    <div><span class="flabel">ห้อง</span><select id="aR">${ROOMS.map(r => `<option ${r === room ? 'selected' : ''}>${r}</option>`).join('')}</select></div>
+    <div><span class="flabel">เลขที่</span><input id="aNo" type="number" min="1" max="60"></div>
+    <div><span class="flabel">ชื่อ–สกุล</span><input id="aN"></div>
+    <div><span class="flabel">ชื่อเล่น</span><input id="aNN"></div>
+    <button class="btn" id="aAdd"><i data-lucide="plus"></i>เพิ่ม</button></div>
+  <div class="xl-imp"><div><b>📥 นำเข้าไฟล์รายชื่อของโรงเรียน (.xlsx)</b><br><small class="muted">อ่านรายชื่อห้องที่สอน (${ROOMS.join(', ')}) อัตโนมัติ แยกห้องตามหัวตาราง "ม. x/x" • อีเมล = kw + รหัสนักเรียน @kw.ac.th • นักเรียนเดิมจะอัปเดตห้อง/เลขที่ให้ตรง</small></div>
+    <label class="btn gold sm"><i data-lucide="file-spreadsheet"></i>เลือกไฟล์ Excel<input type="file" id="xlF" accept=".xlsx,.xls" hidden></label></div>
+  <details><summary style="cursor:pointer;font:500 15px var(--h);color:var(--blue)">วางรายชื่อทั้งห้องจาก Excel / Google Sheets</summary>
+    <div class="note">คัดลอกจากตารางแล้ววางได้เลย 1 บรรทัดต่อ 1 คน เรียงคอลัมน์: <b>อีเมล • ห้อง • เลขที่ • ชื่อ–สกุล • ชื่อเล่น</b> (คั่นด้วยแท็บหรือจุลภาค) • ถ้าไม่ใส่ห้อง จะใช้ห้องที่เลือกด้านบน</div>
+    <textarea class="atext" id="bulk" placeholder="12345@kw.ac.th	${ROOMS[0]}	1	ชื่อตัวอย่าง ใจดี"></textarea>
+    <button class="btn" id="bAdd" style="margin-top:8px"><i data-lucide="upload"></i>นำเข้ารายชื่อ</button></details>
+
+  <h3 style="margin-top:22px"><i data-lucide="users"></i>รายชื่อนักเรียน <small class="muted">(${Object.keys(roster).length} คน • เข้าใช้แล้ว ${joined} ในหน้านี้)</small></h3>
+  ${roomTabs()}
+  <div style="overflow:auto"><table class="board"><tr><th>ห้อง</th><th>เลขที่</th><th>ชื่อ–สกุล</th><th>ชื่อเล่น</th><th>อีเมล</th><th>สถานะ</th><th></th></tr>
+  ${R.map(r => { const u = byEmail[r.id]; return `<tr><td>${E(r.room || '')}</td><td>${E(r.no || '')}</td><td>${E(r.name || '')}</td><td>${E(r.nickname || (u && u.nickname) || '')}</td><td><small>${E(r.id)}</small></td>
+    <td>${u ? `<span class="tag ok">เข้าใช้แล้ว</span> <small>${E(u.nick || '')} • ${totalXP(u)} XP</small>` : '<span class="tag">ยังไม่เข้าใช้</span>'}</td>
+    <td><span class="iact"><button title="แก้ไขรายชื่อ" data-re="${E(r.id)}"><i data-lucide="pencil"></i></button><button class="del" title="ลบออกจากรายชื่อ" data-rd="${E(r.id)}"><i data-lucide="user-minus"></i></button>${u ? `<button class="del" title="ลบข้อมูลความคืบหน้า" data-ud="${u.id}"><i data-lucide="trash-2"></i></button>` : ''}</span></td></tr>`; }).join('')}
+  </table>${R.length ? '' : '<p class="muted center">ยังไม่มีรายชื่อ — เพิ่มทีละคนหรือวางจาก Excel ด้านบน</p>'}</div>
+  ${outsideAll.length ? `<div class="row" style="justify-content:space-between;align-items:center;margin-top:22px"><h3 style="margin:0"><i data-lucide="user-x"></i>นักเรียนที่เข้าใช้แล้วแต่ยังไม่อยู่ในรายชื่อ <small class="muted">(${room === 'ทั้งหมด' ? outsideAll.length : outside.length + ' คนใน ' + room + ' • ทั้งหมด ' + outsideAll.length})</small></h3>${outside.length ? `<button class="btn sm gold" id="uaAll"><i data-lucide="users"></i>เพิ่ม ${outside.length} คนนี้เข้ารายชื่อ</button>` : ''}</div>
+  <p class="muted" style="font-size:13.5px;margin:6px 0 10px">ห้องและเลขที่มาจากที่นักเรียนเลือกเองตอนสร้างฮีโร่ ตรวจแล้วกดเพิ่มเข้ารายชื่อ ระบบจะย้ายไปอยู่ในตารางรายชื่อนักเรียนของห้องนั้น</p>
+  <table class="board"><tr><th>บัญชี</th><th>ชื่อเล่น / ห้อง</th><th>XP</th><th></th></tr>${outside.length ? '' : '<tr><td colspan="4" class="muted">ไม่มีในห้องนี้</td></tr>'}${outside.map(u => `<tr><td><small>${E(u.name || '')}<br>${E(u.email || '')}</small></td><td>${E(nn(u) || '-')} <small class="muted">⚔️ ${E(u.nick || '')}</small> • ${E(u.room || '-')} ${E(u.no || '')}</td><td>${totalXP(u)}</td>
+    <td><span class="iact"><button title="เพิ่มเข้ารายชื่อ" data-ua="${u.id}"><i data-lucide="user-plus"></i></button><button class="del" title="ลบผู้ใช้" data-ud="${u.id}"><i data-lucide="trash-2"></i></button></span></td></tr>`).join('')}</table>` : ''}
+  </div>`;
+  bindRoomTabs();
+  P.querySelector('#restrict').onchange = e => { const v = e.target.checked;
+    if (v && !Object.keys(roster).length) { e.target.checked = false; T2.toast('ยังไม่มีรายชื่อนักเรียน', 'เพิ่มรายชื่อก่อนเปิดโหมดนี้ ไม่อย่างนั้นนักเรียนจะเข้าไม่ได้ทุกคน', 'err'); return; }
+    saveCfg({ restrict: v }, v ? 'เปิดโหมดเฉพาะคนในรายชื่อแล้ว' : 'ปิดโหมดเฉพาะคนในรายชื่อแล้ว'); };
+  P.querySelector('#aAdd').onclick = () => { const em = lowerMail(P.querySelector('#aE').value);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { T2.toast('อีเมลไม่ถูกต้อง', '', 'err'); return; }
+    addRoster([{ email: em, room: P.querySelector('#aR').value, no: +P.querySelector('#aNo').value || '', name: P.querySelector('#aN').value.trim(), nickname: P.querySelector('#aNN').value.trim() }]); };
+  P.querySelector('#bAdd').onclick = () => { const def = P.querySelector('#aR').value; const bad = [];
+    const list = P.querySelector('#bulk').value.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(l => { const c = l.split(/\t|,/).map(x => x.trim());
+      const em = lowerMail(c[0]); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { bad.push(c[0]); return null; }
+      const rm = ROOMS.includes(c[1]) ? c[1] : def; return { email: em, room: rm, no: +c[2] || '', name: c[3] || '', nickname: c[4] || '' }; }).filter(Boolean);
+    if (!list.length) { T2.toast('ไม่พบอีเมลที่ถูกต้อง', '', 'err'); return; }
+    addRoster(list, bad); };
+  P.querySelector('#xlF').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) importXlsx(f); };
+  P.querySelectorAll('[data-rd]').forEach(b => b.onclick = () => { const id = b.dataset.rd;
+    if (!confirm(`ลบ ${id} ออกจากรายชื่อ?\n(ข้อมูลความคืบหน้ายังอยู่ ลบแยกได้ที่ปุ่มถังขยะ)`)) return;
+    busy(async () => { const { db, doc, deleteDoc } = fb(); await deleteDoc(doc(db, 'roster', id)); }, 'ลบออกจากรายชื่อแล้ว'); });
+  P.querySelectorAll('[data-re]').forEach(b => b.onclick = () => editRoster(b.dataset.re));
+  P.querySelectorAll('[data-ud]').forEach(b => b.onclick = () => delUser(users.find(x => x.id === b.dataset.ud)));
+  const toR = u => ({ email: lowerMail(u.email), room: ROOMS.includes(u.room) ? u.room : ROOMS[0], no: u.no || +((u.name || '').match(/^\s*(\d{1,2})/) || [])[1] || '', name: (u.name || '').replace(/^\s*\d{1,2}\s*/, '').trim(), nickname: u.nickname || '' });
+  P.querySelectorAll('[data-ua]').forEach(b => b.onclick = () => { const u = users.find(x => x.id === b.dataset.ua); addRoster([toR(u)]); });
+  const ua = P.querySelector('#uaAll'); if (ua) ua.onclick = () => { if (confirm(`เพิ่มนักเรียน ${outside.length} คนเข้ารายชื่อตามห้องและเลขที่ที่นักเรียนเลือกไว้?`)) addRoster(outside.map(toR)); };
+};
+const addRoster = (list, bad = []) => busy(async () => {
+  const { db, doc, setDoc } = fb();
+  for (let i = 0; i < list.length; i += 20) await Promise.all(list.slice(i, i + 20).map(r => setDoc(doc(db, 'roster', r.email), Object.assign({ email: r.email, room: r.room, no: r.no, name: r.name, nickname: r.nickname || (roster[r.email] || {}).nickname || '' }, roster[r.email] ? {} : { added: Date.now() }), { merge: true })));
+  const bx = P.querySelector('#bulk'); if (bx) bx.value = '';
+  if (bad.length) T2.toast(`ข้าม ${bad.length} บรรทัดที่อีเมลไม่ถูกต้อง`, bad.slice(0, 3).join(', '), 'err');
+}, `เพิ่ม/อัปเดตรายชื่อ ${list.length} คนแล้ว`);
+/* นำเข้าไฟล์รายชื่อนักเรียนของโรงเรียน (.xlsx) */
+const loadXLSX = () => window.XLSX ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'; sc.onload = ok; sc.onerror = () => no(new Error('โหลดตัวอ่าน Excel ไม่ได้ ตรวจอินเทอร์เน็ต')); document.head.appendChild(sc); });
+const parseSchoolXlsx = wb => { const out = [];
+  wb.SheetNames.forEach(sn => { let cur = null;
+    XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: true, defval: '' }).forEach(r => {
+      const h = String(r[0] || '').replace(/\s+/g, '').match(/^ม\.?(\d)\/(\d{1,2})$/); if (h) { cur = `ม.${h[1]}/${+h[2]}`; return; }
+      const no = +r[0], id = String(r[1] || '').trim();
+      if (cur && no >= 1 && no <= 70 && /^\d{4,6}$/.test(id) && String(r[3] || '').trim())
+        out.push({ email: `kw${id}@kw.ac.th`, room: cur, no, sid: id, name: `${String(r[2] || '').trim()}${String(r[3]).trim()} ${String(r[4] || '').trim()}`.trim(), left: String(r[5] || '').trim() === 'ล' });
+    }); });
+  return out; };
+const importXlsx = async f => { let list;
+  try { await loadXLSX(); list = parseSchoolXlsx(XLSX.read(await f.arrayBuffer())); } catch (e) { T2.toast('อ่านไฟล์ไม่ได้', e.message, 'err'); return; }
+  const mine = list.filter(r => ROOMS.includes(r.room)), by = {}; mine.forEach(r => (by[r.room] = by[r.room] || []).push(r));
+  if (!mine.length) { T2.toast('ไม่พบรายชื่อห้องที่สอน', ROOMS.join(', '), 'err'); return; }
+  const left = mine.filter(r => r.left), byEmail = {}; (users || []).forEach(u => byEmail[lowerMail(u.email)] = u);
+  const fix = mine.filter(r => { const u = byEmail[r.email]; return u && (u.room !== r.room || +u.no !== r.no); });
+  const m = T2.modal(`<h3>📥 นำเข้ารายชื่อจาก ${E(f.name)}</h3>
+    <table class="board"><tr><th>ห้อง</th><th>นักเรียน</th><th>เข้าใช้แล้ว</th><th>มีหมายเหตุ "ล"</th></tr>${ROOMS.map(rm => { const a = by[rm] || []; return `<tr><td><b>${rm}</b></td><td>${a.length}</td><td>${a.filter(r => byEmail[r.email]).length}</td><td>${a.filter(r => r.left).length}</td></tr>`; }).join('')}</table>
+    ${left.length ? `<label class="switch" style="margin-top:10px"><input type="checkbox" id="xlL"> นำเข้านักเรียนที่มีหมายเหตุ "ล" ด้วย (${left.length} คน: ${left.slice(0, 4).map(r => E(r.room + ' #' + r.no)).join(', ')}${left.length > 4 ? '…' : ''})</label>` : ''}
+    ${fix.length ? `<label class="switch"><input type="checkbox" id="xlU" checked> แก้ห้อง/เลขที่ของนักเรียนที่เลือกเองไม่ตรงไฟล์ (${fix.length} คน)</label>` : ''}
+    <p class="muted" style="font-size:13.5px">ชื่อเล่นที่ครูเคยใส่ไว้จะไม่ถูกลบ</p><button class="btn gold block" id="xlGo">นำเข้า</button>`);
+  m.el.querySelector('#xlGo').onclick = () => { const inclL = (m.el.querySelector('#xlL') || {}).checked, upd = (m.el.querySelector('#xlU') || {}).checked; m.close();
+    const L = mine.filter(r => inclL || !r.left);
+    busy(async () => { const { db, doc, setDoc } = fb();
+      for (let i = 0; i < L.length; i += 20) await Promise.all(L.slice(i, i + 20).map(r => setDoc(doc(db, 'roster', r.email), Object.assign({ email: r.email, room: r.room, no: r.no, name: r.name, sid: r.sid, left: r.left }, roster[r.email] ? {} : { added: Date.now(), nickname: '' }), { merge: true })));
+      if (upd) { const F = fix.filter(r => L.includes(r));
+        for (let i = 0; i < F.length; i += 20) await Promise.all(F.slice(i, i + 20).map(async r => { const u = byEmail[r.email];
+          await setDoc(doc(db, 'users', u.id), { room: r.room, no: r.no }, { merge: true }); await setDoc(doc(db, 'board', u.id), { room: r.room }, { merge: true }); })); }
+    }, `นำเข้ารายชื่อ ${L.length} คนแล้ว`); };
+};
+const editRoster = id => { const r = roster[id] || {};
+  const m = T2.modal(`<h3>แก้ไขรายชื่อ</h3><p class="muted">${E(id)}</p>
+    <label>ชื่อ–สกุล<input id="rN" value="${E(r.name || '')}"></label>
+    <label>ชื่อเล่น<input id="rNN" value="${E(r.nickname || '')}"></label>
+    <label>ห้องเรียน<select id="rR">${ROOMS.map(x => `<option ${x === r.room ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
+    <label>เลขที่<input id="rNo" type="number" value="${E(r.no || '')}"></label><button class="btn gold block" id="rS">บันทึก</button>`);
+  m.el.querySelector('#rS').onclick = () => { const v = { nickname: m.el.querySelector('#rNN').value.trim(), name: m.el.querySelector('#rN').value.trim(), room: m.el.querySelector('#rR').value, no: +m.el.querySelector('#rNo').value || '' }; m.close();
+    busy(async () => { const { db, doc, setDoc } = fb(); await setDoc(doc(db, 'roster', id), v, { merge: true }); }, 'บันทึกแล้ว'); };
+};
+
+/* ---------- 3) เปิด–ปิดกิจกรรม ---------- */
+const drawLessons = () => {
+  P.innerHTML = `<div class="apanel"><h3><i data-lucide="book-open"></i>เปิด–ปิดกิจกรรมสำหรับนักเรียน</h3>
+  <div class="note">กิจกรรมที่ปิด นักเรียนจะเห็นเป็น "เร็ว ๆ นี้" และเข้าไม่ได้ • ครูยังเปิดดูตัวอย่างได้เสมอ • บทที่ <span class="tag warn">ยังไม่มีเนื้อหา</span> ถ้าเปิดจะแสดงหน้า "กำลังจัดทำ"</div>
+  <div class="row" style="gap:8px;margin:8px 0"><button class="btn sm ghost" id="allOn">เปิดทุกกิจกรรมที่มีเนื้อหา</button><button class="btn sm ghost" id="allOff">ปิดทั้งหมด</button></div>
+  ${UNITS.map(un => `<h4 style="margin:18px 0 4px;color:${un.color}">หน่วยที่ ${un.n} ${E(un.title || un.short)}</h4>${LESSONS.filter(l => l.unit === un.n).map(l => `<div class="lrow"><span class="no" style="background:${un.color}">${l.id}</span>
+    <div><b>${E(l.title)}</b>${l.built ? '<span class="tag ok">มีเนื้อหาแล้ว</span>' : '<span class="tag warn">ยังไม่มีเนื้อหา</span>'}<br><small class="muted">${l.hours} ชั่วโมง • ${l.ind.join(', ')}</small></div>
+    <label class="switch"><input type="checkbox" data-l="${l.id}" ${l.ready ? 'checked' : ''}><span>${l.ready ? 'เปิด' : 'ปิด'}</span></label></div>`).join('')}${UNIT_TESTS[un.n] ? `<div class="lrow"><span class="no" style="background:${un.color}">📝</span><div><b>แบบทดสอบประจำหน่วยที่ ${un.n}</b> <span class="tag ok">10 ข้อ</span><br><small class="muted">ถ้าไม่ตั้งค่า จะเปิดเองเมื่อทุกบทในหน่วยเปิดแล้ว</small></div><label class="switch"><input type="checkbox" data-u="${un.n}" ${T2.unitOpen(un.n) ? 'checked' : ''}><span>${T2.unitOpen(un.n) ? 'เปิด' : 'ปิด'}</span></label></div>` : ''}`).join('')}
+  <div style="position:sticky;bottom:12px;margin-top:16px"><button class="btn gold block lg" id="lSave"><i data-lucide="save"></i>บันทึกการเปิด–ปิดกิจกรรม</button></div></div>`;
+  P.querySelectorAll('[data-l],[data-u]').forEach(c => c.onchange = () => c.nextElementSibling.textContent = c.checked ? 'เปิด' : 'ปิด');
+  P.querySelector('#allOn').onclick = () => P.querySelectorAll('[data-l]').forEach(c => { c.checked = LESSONS.find(l => l.id === +c.dataset.l).built; c.onchange(); });
+  P.querySelector('#allOff').onclick = () => P.querySelectorAll('[data-l]').forEach(c => { c.checked = false; c.onchange(); });
+  P.querySelector('#lSave').onclick = () => { const o = {}, un = {}; P.querySelectorAll('[data-l]').forEach(c => o[c.dataset.l] = c.checked); P.querySelectorAll('[data-u]').forEach(c => un[c.dataset.u] = c.checked);
+    saveCfg({ lessons: o, units: un }, `เปิดให้นักเรียน ${Object.values(o).filter(Boolean).length} บท`); };
+};
+
+/* ---------- 4) ประกาศ & ตั้งค่า ---------- */
+let anEdit = null;
+const drawAnnounce = () => { const L = T2.annsAll ? T2.annsAll() : [], now = Date.now(), ed = anEdit;
+  const dateV = t => t ? new Date(t + 7 * 36e5).toISOString().slice(0, 10) : '';
+  P.innerHTML = `<div class="apanel"><div class="row" style="justify-content:space-between;align-items:center;margin:0 0 10px"><h3 style="margin:0"><i data-lucide="megaphone"></i>ประกาศ <small class="muted">${L.length} รายการ</small></h3><button class="btn gold sm" id="anNew"><i data-lucide="plus"></i>ประกาศใหม่</button></div>
+  ${ed ? `<div class="an-form card"><h4 style="margin:0 0 8px">${ed.id ? '✏️ แก้ไขประกาศ' : '📣 ประกาศใหม่'}</h4>
+    <input id="anTi" maxlength="60" placeholder="หัวข้อ (ไม่บังคับ) เช่น ส่งงานกิจกรรมที่ 1.2" value="${E(ed.title || '')}">
+    <textarea class="atext" id="anT" maxlength="500" placeholder="ข้อความประกาศ">${E(ed.text || '')}</textarea>
+    <span class="flabel">ส่งถึง</span>
+    <div class="an-target"><label class="chip ${!(ed.rooms || []).length ? 'on' : ''}"><input type="radio" name="anScope" value="all" ${!(ed.rooms || []).length ? 'checked' : ''}> 🏫 ทั้งระดับ ${COURSE.lv}</label><label class="chip ${(ed.rooms || []).length ? 'on' : ''}"><input type="radio" name="anScope" value="rooms" ${(ed.rooms || []).length ? 'checked' : ''}> 🚪 เลือกห้อง</label>
+    <span class="an-rooms" style="${(ed.rooms || []).length ? '' : 'display:none'}">${ROOMS.map(r => `<label class="chip"><input type="checkbox" value="${r}" ${(ed.rooms || []).includes(r) ? 'checked' : ''}> ${r}</label>`).join('')}</span></div>
+    <div class="row" style="gap:16px;margin:10px 0;flex-wrap:wrap;align-items:center"><label class="switch"><input type="checkbox" id="anU" ${ed.level === 'urgent' ? 'checked' : ''}> 🚨 ประกาศด่วน (สีส้ม)</label><label class="switch"><input type="checkbox" id="anPin" ${ed.pin ? 'checked' : ''}> 📌 ปักหมุดไว้บนสุด</label><label>แสดงถึงวันที่ <input type="date" id="anUntil" value="${dateV(ed.until)}"></label><small class="muted">เว้นว่าง = แสดงจนกว่าจะปิด</small></div>
+    <div class="row" style="gap:8px;margin:0"><button class="btn gold" id="anS"><i data-lucide="send"></i>${ed.id ? 'บันทึก' : 'ประกาศ'}</button><button class="btn ghost" id="anC">ยกเลิก</button></div></div>` : ''}
+  <div class="an-list">${L.length ? L.slice().sort((a, b) => (b.at || 0) - (a.at || 0)).map(a => { const exp = a.until && now > a.until, live = a.on && !exp;
+    return `<div class="an-it ${live ? '' : 'off'} ${a.level === 'urgent' ? 'urgent' : ''}"><div class="an-h"><b>${a.pin ? '📌 ' : ''}${a.level === 'urgent' ? '🚨 ' : ''}${E(a.title || 'ประกาศจากครู')}</b><span class="an-tg">${E(T2.annTarget(a))}</span><span class="an-st">${live ? '🟢 กำลังแสดง' : exp ? '⏱️ หมดเวลา' : '⚪ ปิดอยู่'}</span></div><p>${E(a.text).replace(/\n/g, '<br>')}</p><small class="muted">${a.at ? new Date(a.at).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''}${a.until ? ' • แสดงถึง ' + new Date(a.until).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) : ''}</small>
+    <div class="an-act"><button class="btn sm ghost" data-an-tog="${a.id}">${a.on ? '⏸ ปิด' : '▶ เปิด'}</button><button class="btn sm ghost" data-an-ed="${a.id}">✏️ แก้ไข</button><button class="btn sm ghost" data-an-del="${a.id}" style="color:#B91C1C">🗑 ลบ</button></div></div>`; }).join('') : '<p class="muted">ยังไม่มีประกาศ</p>'}</div>
+  <h3 style="margin-top:28px"><i data-lucide="settings"></i>ข้อมูลระบบ</h3>
+  <div class="note">บัญชีครูที่มีสิทธิ์: ${TEACHER_EMAILS.map(E).join(', ')}<br>ห้องเรียน: ${ROOMS.join(', ')}<br>ฐานข้อมูล: Firebase โปรเจกต์ computer-eng-kw (asia-southeast1)<br>ต้องการเปลี่ยนบัญชีครู / ห้องเรียน แจ้งผู้ดูแลเว็บให้แก้ไฟล์ config.js</div>
+  <a class="btn ghost" href="https://console.firebase.google.com/project/computer-eng-kw/authentication/users" target="_blank" rel="noopener"><i data-lucide="external-link"></i>บัญชีที่ล็อกอิน (Firebase Authentication)</a></div>`;
+  T2.icons();
+  const put = (list, msg) => saveCfg({ anns: list }, msg);
+  P.querySelector('#anNew').onclick = () => { anEdit = { on: true, rooms: [] }; drawAnnounce(); };
+  P.querySelectorAll('[data-an-ed]').forEach(b => b.onclick = () => { anEdit = Object.assign({}, L.find(a => a.id === b.dataset.anEd)); drawAnnounce(); });
+  P.querySelectorAll('[data-an-tog]').forEach(b => b.onclick = () => put(L.map(a => a.id === b.dataset.anTog ? Object.assign({}, a, { on: !a.on }) : a), 'อัปเดตประกาศแล้ว'));
+  P.querySelectorAll('[data-an-del]').forEach(b => b.onclick = () => { if (confirm('ลบประกาศนี้?')) put(L.filter(a => a.id !== b.dataset.anDel), 'ลบประกาศแล้ว'); });
+  if (ed) {
+    P.querySelectorAll('[name=anScope]').forEach(r => r.onchange = () => { P.querySelector('.an-rooms').style.display = r.value === 'rooms' && r.checked ? '' : r.value === 'all' && r.checked ? 'none' : P.querySelector('.an-rooms').style.display; P.querySelectorAll('.an-target>label').forEach(l => l.classList.toggle('on', l.querySelector('input').checked)); });
+    P.querySelector('#anC').onclick = () => { anEdit = null; drawAnnounce(); };
+    P.querySelector('#anS').onclick = () => { const text = P.querySelector('#anT').value.trim(); if (!text) { T2.toast('ใส่ข้อความประกาศก่อน', '', 'err'); return; }
+      const scope = P.querySelector('[name=anScope]:checked').value, rooms = scope === 'rooms' ? [...P.querySelectorAll('.an-rooms input:checked')].map(i => i.value) : [];
+      if (scope === 'rooms' && !rooms.length) { T2.toast('เลือกอย่างน้อย 1 ห้อง', '', 'err'); return; }
+      const u = P.querySelector('#anUntil').value, item = { id: ed.id && ed.id !== 'legacy' ? ed.id : 'a' + Date.now().toString(36), title: P.querySelector('#anTi').value.trim(), text, rooms, level: P.querySelector('#anU').checked ? 'urgent' : 'info', pin: P.querySelector('#anPin').checked, on: ed.id ? ed.on !== false : true, at: ed.id ? (ed.at || Date.now()) : Date.now(), until: u ? new Date(u + 'T23:59:59+07:00').getTime() : null };
+      const list = L.filter(a => a.id !== ed.id).concat(item); anEdit = null;
+      saveCfg(ed.id === 'legacy' ? { anns: list, announce: { text: '', on: false } } : { anns: list }, `${ed.id ? 'บันทึก' : 'ประกาศ'}แล้ว • ${T2.annTarget(item)}`); };
+  }
+};
+
+const saveCfg = (patch, ok) => busy(async () => { const { db, doc, setDoc } = fb();
+  await setDoc(doc(db, 'config', 'app'), patch, { merge: true }); await T2.loadCfg(); }, ok);
+
+/* ---------- วาด ---------- */
+/* ---------- E-Ticket ก่อนออกจากห้อง ---------- */
+let etL = '', etD = '';
+const CONF_EM = ['', '😟', '😕', '🙂', '😀', '🤩'], CONF_TX = ['', 'น้อยมาก', 'น้อย', 'เข้าใจ', 'มั่นใจ', 'สอนเพื่อนได้'];
+/* E-Ticket มี 2 รูปแบบ: เดิม (ได้เรียนรู้/นำไปใช้/ยังไม่เข้าใจ) และ 3-2-1 (v:2) แสดงรวมกัน คำตอบเดิมไม่ถูกลบ */
+const etList = a => (a || []).filter(Boolean).map((x, i) => `${i + 1}) ${E(x)}`).join('<br>');
+const etOld = r => r.v === 2 ? r.old : r;
+const etCell = r => ({ learn: r.v === 2 ? etList(r.l3) : E(r.learn), int: r.v === 2 ? etList(r.i2) : '<span class="muted">–</span>', ask: E(r.v === 2 ? r.q1 : r.ask),
+  old: (o => o && (o.learn || o.apply || o.ask) ? `${r.v === 2 ? `<small class="muted">ได้เรียนรู้:</small> ${E(o.learn || '-')}<br>` : ''}<small class="muted">จะนำไปใช้:</small> ${E(o.apply || '-')}${r.v === 2 ? `<br><small class="muted">ยังไม่เข้าใจ:</small> ${E(o.ask || '-')}` : ''}` : '<span class="muted">–</span>')(etOld(r)) });
+const drawET = () => {
+  const rows = []; (users || []).forEach(u => Object.entries(u.et || {}).forEach(([lid, r]) => rows.push(Object.assign({ u, lid }, r))));
+  const lids = [...new Set(rows.map(r => r.lid))].sort((a, b) => +a.slice(1) - +b.slice(1)), dates = [...new Set(rows.map(r => r.date))].sort().reverse();
+  if (!etL && lids.length) etL = lids[lids.length - 1];
+  const L = rows.filter(r => (!etL || r.lid === etL) && (!etD || r.date === etD) && (room === 'ทั้งหมด' || r.u.room === room) && match(r.u, [r.learn, r.ask, (r.i2 || []).join(' ')].join(' ')))
+    .sort((a, b) => (a.u.room || '').localeCompare(b.u.room || '') || (+a.u.no || 99) - (+b.u.no || 99));
+  const avg = L.length ? (L.reduce((a, r) => a + (+r.conf || 0), 0) / L.length).toFixed(1) : '-';
+  const asks = L.filter(r => r.ask && !/^ไม่มี/.test(r.ask.trim()));
+  P.innerHTML = `${roomTabs()}
+  <div class="row" style="margin:0 0 12px;gap:8px;flex-wrap:wrap"><label>กิจกรรม <select id="etL">${lids.map(l => { const m = LESSONS.find(x => 'l' + x.id === l); return `<option value="${l}" ${l === etL ? 'selected' : ''}>กิจกรรมที่ ${l.slice(1)}${m ? ' ' + E(m.title.slice(0, 40)) : ''}</option>`; }).join('') || '<option>ยังไม่มีข้อมูล</option>'}</select></label>
+    <label>วันที่เรียน <select id="etD"><option value="">ทุกวัน</option>${dates.map(d => `<option ${d === etD ? 'selected' : ''}>${d}</option>`).join('')}</select></label>
+    <button class="btn sm ghost" id="etCsv" style="margin-left:auto"><i data-lucide="download"></i>CSV</button></div>
+  <div class="grid3" style="margin-bottom:14px"><div class="mini"><div class="em">🎟️</div><h4>${L.length} คน</h4><p>ส่ง E-Ticket แล้ว</p></div><div class="mini"><div class="em">📈</div><h4>${avg} / 5</h4><p>ระดับความเข้าใจเฉลี่ย</p></div><div class="mini"><div class="em">❓</div><h4>${asks.length} คน</h4><p>มีคำถามถึงครู</p></div></div>
+  ${asks.length ? `<div class="box warn"><b>❓ คำถามและสิ่งที่นักเรียนยังไม่เข้าใจ</b><ul style="margin:6px 0 0">${asks.map(r => `<li><b>${E(r.u.room || '')} #${E(r.u.no || '-')} ${E(r.u.nickname || r.u.name || '')}</b> — ${E(r.ask)}</li>`).join('')}</ul></div>` : ''}
+  <div style="overflow:auto;margin-top:12px"><table class="board"><tr><th>ห้อง</th><th>เลขที่</th><th>ชื่อ</th><th>วันที่</th><th>3 สิ่งที่ได้เรียนรู้</th><th>2 สิ่งที่สนใจ</th><th>1 คำถาม</th><th>คำตอบรูปแบบเดิม</th><th>ระดับความเข้าใจ</th></tr>
+  ${L.map(r => { const c = etCell(r); return `<tr><td>${E(r.u.room || '-')}</td><td>${E(r.u.no || '-')}</td><td>${E(r.u.nickname || r.u.name || r.u.email)}</td><td>${E(r.date)}</td><td>${c.learn}</td><td>${c.int}</td><td>${c.ask}</td><td>${c.old}</td><td title="${+r.conf}/5" style="white-space:nowrap">${CONF_EM[+r.conf] || '-'} ${CONF_TX[+r.conf] || ''}</td></tr>`; }).join('') || '<tr><td colspan="9" class="muted">ยังไม่มีนักเรียนส่ง E-Ticket</td></tr>'}</table></div>`;
+  bindRoomTabs();
+  P.querySelector('#etL').onchange = e => { etL = e.target.value; draw(); };
+  P.querySelector('#etD').onchange = e => { etD = e.target.value; draw(); };
+  P.querySelector('#etCsv').onclick = () => { const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const csv = '﻿' + [['ห้อง', 'เลขที่', 'ชื่อ', 'อีเมล', 'กิจกรรม', 'วันที่', 'รูปแบบ', 'ได้เรียนรู้ 1', 'ได้เรียนรู้ 2', 'ได้เรียนรู้ 3', 'สนใจ 1', 'สนใจ 2', 'คำถาม', 'ระดับความเข้าใจ (1-5)', 'ระดับความเข้าใจ', '(เดิม) ได้เรียนรู้', '(เดิม) จะนำไปใช้', '(เดิม) ยังไม่เข้าใจ']].concat(L.map(r => { const v2 = r.v === 2, o = etOld(r) || {}, l3 = v2 ? (r.l3 || []) : [], i2 = v2 ? (r.i2 || []) : [];
+      return [r.u.room, r.u.no, r.u.nickname || r.u.name, r.u.email, r.lid.slice(1), r.date, v2 ? '3-2-1' : 'เดิม', l3[0], l3[1], l3[2], i2[0], i2[1], v2 ? r.q1 : '', r.conf, CONF_TX[+r.conf] || '', o.learn, o.apply, o.ask]; })).map(a => a.map(q).join(',')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `eticket-${etL}-${etD || 'all'}.csv`; a.click(); };
+};
+
+/* ---------- รูปนักเรียน: เห็นเฉพาะบัญชีครู (รูปเก็บในเอกสารผู้ใช้ ไม่อยู่ในข้อมูลที่เพื่อนอ่านได้) ---------- */
+const drawFaces = () => {
+  const list = (users || []).filter(u => !TEACHER_EMAILS.includes((u.email || '').toLowerCase())).filter(u => room === 'ทั้งหมด' || u.room === room)
+    .filter(u => !q || [u.name, u.nickname, u.nick, u.email].join(' ').toLowerCase().includes(q.toLowerCase()))
+    .sort((a, b) => String(a.room || '').localeCompare(String(b.room || ''), 'th', { numeric: true }) || (+a.no || 99) - (+b.no || 99));
+  const has = list.filter(u => u.photo).length;
+  P.innerHTML = roomTabs() + `<p class="muted">มีรูปแล้ว ${has} จาก ${list.length} คน • นักเรียนอัปโหลดรูปเองที่หน้าโปรไฟล์ • รูปแสดงเฉพาะในหน้านี้</p>
+    <div class="fp-grid">${list.map(u => { const c = HERO_CLASSES[(u.hero || {}).cls]; return `<div class="fp-card"><div class="fp-img">${u.photo ? `<img src="${E(u.photo)}" alt="">` : '🙂'}</div>
+      <b>${E(u.nickname || u.nick || '-')}</b><small>${E(u.name || '')}</small><small>${E(u.room || '-')}${u.no ? ' เลขที่ ' + E(u.no) : ''}</small>${c ? `<small style="color:${c.c1};font-weight:600">${c.name}</small>` : ''}</div>`; }).join('') || '<p class="muted">ยังไม่มีนักเรียนในห้องนี้</p>'}</div>`;
+  bindRoomTabs(); T2.icons();
+};
+const draw = () => {
+  if (!T2.ready) { P.innerHTML = '<p class="muted">กำลังตรวจสอบสิทธิ์...</p>'; return; }
+  if (!T2.user) { P.innerHTML = '<div class="center" style="padding:30px"><p>เข้าสู่ระบบด้วยบัญชีครูเพื่อใช้งานเมนูครู</p><button class="btn gold" onclick="T2.login()"><i data-lucide="log-in"></i>เข้าสู่ระบบ</button></div>'; T2.icons(); return; }
+  if (!T2.isTeacher()) { P.innerHTML = '<p class="bad">บัญชีนี้ไม่มีสิทธิ์เข้าเมนูครู</p>'; return; }
+  if (!users) { P.innerHTML = '<p class="muted">กำลังโหลดข้อมูล...</p>'; return; }
+  ({ progress: drawProgress, users: drawUsers, faces: drawFaces, lessons: drawLessons, announce: drawAnnounce, eticket: drawET })[tab]();
+  T2.icons();
+};
+let started = false;
+T2.on(() => { if (T2.ready && !started && T2.isTeacher()) { started = true; load(); } else if (tab !== 'lessons' && tab !== 'announce') draw(); else if (!users) draw(); });
+setTab();
+});
+</script>
+</body>
+</html>

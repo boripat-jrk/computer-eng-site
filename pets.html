@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>สัตว์เลี้ยง | Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4)</title>
+<meta name="theme-color" content="#0B2E5C">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="cq">
+<main class="wrap pt-wrap" id="pe"><p class="muted">กำลังโหลด...</p></main>
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script>
+<script>
+addEventListener('DOMContentLoaded',()=>{T2.boot('pets');
+const E=s=>T2.esc(s==null?'':String(s)),box=document.getElementById('pe');
+const TYPES=['ทั้งหมด','สัตว์คู่หูเริ่มต้น','หุ่นไซบอร์ก','ตุ๊กตา','ดิจิทัล','สัตว์วิเศษ'];
+let tab=sessionStorage.getItem('pe-tab')||'ทั้งหมด',key='';
+const LINES=['เย้! ได้ลูบหัวแล้ว 💕','ไปเรียนกันเถอะ!','วันนี้เก็บ XP ได้เยอะไหม?','อยากได้ขนมจัง 🍪','เก่งขึ้นทุกวันเลยนะ!','ง่วงจัง... 💤'];
+const card=p=>{const d=T2.petData()[p.id],open=T2.petOpen(p),act=T2.petActive()===p.id,st=d?T2.petStage(p.id):1;
+ return `<div class="pe-card ${open?'':'lock'} ${act?'on':''}" style="--pc:${p.c}"><div class="pe-img">${petSVG(p.id,st,84)}</div><b>${open||p.starter?E(d?d.name:p.name):'???'}</b><small>${E(p.type)}</small>
+ ${!open?`<em class="pe-need">🔒 ${p.xp} XP<span class="bar"><i style="width:${Math.min(100,T2.xp()/p.xp*100)}%"></i></span></em>`:act?'<em class="pe-tag">⭐ อยู่กับฉัน</em>':d?`<button class="btn sm" data-use="${p.id}">ให้ติดตาม</button>`:`<button class="btn sm gold" data-adopt="${p.id}">รับเลี้ยง</button>`}
+ ${d?`<span class="pe-st">ร่าง ${st}</span>`:''}</div>`};
+const draw=()=>{if(!T2.ready)return;const s=T2.state;
+ if(!T2.user){box.innerHTML='<div class="pt-empty card"><div class="big-emoji">🐾</div><h2>สัตว์เลี้ยง</h2><p class="muted">เข้าสู่ระบบเพื่อรับเลี้ยงสัตว์คู่หู</p><button class="btn gold" onclick="T2.login()">เข้าสู่ระบบ</button></div>';return;}
+ if(!s.hero){box.innerHTML='<div class="pt-empty card"><div class="big-emoji">🛡️</div><h2>สร้างฮีโร่ก่อน</h2><p class="muted">สัตว์เลี้ยงจะร่วมเดินทางไปกับฮีโร่</p><button class="btn gold" onclick="T2.setupProfile()">สร้างฮีโร่</button></div>';return;}
+ const k=JSON.stringify([s.pets,(s.hero.eq||{}).pet,T2.xp(),tab]);if(k===key)return;key=k;
+ const id=T2.petActive(),p=id&&PETS.find(x=>x.id===id),d=id&&T2.petData()[id],owned=Object.keys(T2.petData()).length,opened=PETS.filter(x=>T2.petOpen(x)).length,next=PETS.find(x=>!T2.petOpen(x));
+ let top;
+ if(!p){top=`<div class="card pe-start"><h2>🐣 เลือกสัตว์คู่หูตัวแรก</h2><p class="muted">เลือกได้ 1 ตัวก่อน ตัวอื่นรับเลี้ยงเพิ่มได้ภายหลัง สัตว์คู่หูจะเดินตามฮีโร่ และเติบโตไปพร้อมกับ XP ที่สะสม</p>
+  <div class="pe-starters">${PETS.filter(x=>x.starter).map(x=>`<button class="pe-s" data-adopt="${x.id}" style="--pc:${x.c}"><span class="pe-bob">${petSVG(x.id,1,110)}</span><b>${E(x.name)}</b><small>${E(x.desc)}</small></button>`).join('')}</div></div>`;}
+ else{const st=T2.petStage(id),b=T2.petBond(id),S=T2.petStages,nx=S[st],log=d.log&&d.log.d===T2.today()?d.log:{treat:0,pat:0};
+  top=`<div class="card pe-main" style="--pc:${p.c}"><div class="pe-stage"><div class="pe-hero">${heroSVG(s.hero,T2.lv(),86)}</div><div class="pe-pet" id="pePet">${petSVG(id,st,190,'big')}</div><div class="pe-fx" id="peFx"></div><div class="pe-bub" id="peBub"></div></div>
+  <div class="pe-info"><small class="kick" style="color:${p.c}">${E(p.type)} • ${E(p.name)}</small><h2>${E(d.name)} <button class="pe-ren" data-ren title="ตั้งชื่อใหม่">✏️</button></h2><p class="muted" style="margin:0 0 10px">${E(p.desc)}</p>
+  <div class="pe-evo">${S.map((x,i)=>`<span class="${i<st?'on':''}">${petSVG(id,i+1,44)}<small>${x[1]}</small></span>`).join('<i>→</i>')}</div>
+  <div class="pe-bond"><b>💞 ความผูกพัน ${b}</b>${nx?`<small>อีก ${nx[0]-b} จะวิวัฒนาการเป็น “${nx[1]}”</small>`:'<small>ร่างสูงสุดแล้ว!</small>'}<div class="bar"><i style="width:${nx?Math.min(100,(b-S[st-1][0])/(nx[0]-S[st-1][0])*100):100}%"></i></div><small class="muted">ได้จาก XP ที่สะสมหลังรับเลี้ยง • ให้ขนมวันละครั้ง +10 • ลูบหัววันละ 3 ครั้ง +2</small></div>
+  <div class="pe-acts"><button class="btn" data-act="pat">🤚 ลูบหัว <small>${3-log.pat}/3</small></button><button class="btn" data-act="treat" ${log.treat?'disabled':''}>🍪 ให้ขนม ${log.treat?'<small>พรุ่งนี้</small>':''}</button><button class="btn" data-act="play">🎾 เล่นด้วยกัน</button><button class="btn ghost" data-act="none">🚶 ไม่พาไปด้วย</button></div></div></div>`;}
+ box.innerHTML=`<div class="pt-head"><div class="ch-tabs"><a href="profile.html" class="pet-back"><i data-lucide="arrow-left"></i>กลับไปหน้าตัวละคร</a><a href="#" data-wardrobe>🎨 แต่งตัว</a><b class="on">🐾 สัตว์เลี้ยง</b></div><div><small class="kick">PET COMPANION</small><h1>สัตว์เลี้ยง</h1><p class="muted">สะสมแล้ว ${owned}/${PETS.length} ตัว • ปลดล็อกแล้ว ${opened} ตัว${next?` • ตัวถัดไปที่ ${next.xp} XP (อีก ${next.xp-T2.xp()} XP)`:''}</p></div></div>${top}
+ <div class="card pe-book"><div class="row" style="justify-content:space-between;align-items:center;margin:0 0 12px"><h3 style="margin:0">📖 สมุดสัตว์เลี้ยง</h3><div class="pt-tabs">${TYPES.map(t=>`<button data-ty="${t}" class="${t===tab?'on':''}">${t==='สัตว์คู่หูเริ่มต้น'?'เริ่มต้น':t}</button>`).join('')}</div></div>
+ <div class="pe-grid">${PETS.filter(x=>tab==='ทั้งหมด'||x.type===tab).map(card).join('')}</div></div>`;T2.icons();};
+const say=t=>{const b=document.getElementById('peBub');if(!b)return;b.textContent=t;b.classList.add('on');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('on'),2200);};
+const anim=c=>{const el=document.getElementById('pePet');if(!el)return;el.classList.remove('a-jump','a-spin','a-pat','a-eat');void el.offsetWidth;el.classList.add(c);};
+const fx=(ch,n=6)=>{const f=document.getElementById('peFx');if(!f)return;f.innerHTML=Array.from({length:n},(_,i)=>`<i style="left:${30+Math.random()*40}%;animation-delay:${i*.08}s">${ch}</i>`).join('');};
+document.addEventListener('click',e=>{const t=e.target.closest('[data-adopt],[data-use],[data-act],[data-ty],[data-ren],#pePet');if(!t)return;
+ if(t.dataset.ty){tab=t.dataset.ty;sessionStorage.setItem('pe-tab',tab);key='';draw();return}
+ if(t.dataset.adopt){const p=PETS.find(x=>x.id===t.dataset.adopt);if(T2.petAdopt(p.id)){T2.confetti(90);T2.toast(`🐾 รับเลี้ยง${p.name}แล้ว!`,'คู่หูพร้อมร่วมเดินทางไปทุกกิจกรรมแล้ว');key='';draw();scrollTo({top:0,behavior:'smooth'});}return}
+ if(t.dataset.use){T2.petEquip(t.dataset.use);T2.toast('🐾 เปลี่ยนสัตว์คู่หูแล้ว');key='';draw();scrollTo({top:0,behavior:'smooth'});return}
+ if(t.hasAttribute('data-ren')){const id=T2.petActive(),d=T2.petData()[id];const n=prompt('ตั้งชื่อสัตว์เลี้ยง (ไม่เกิน 16 ตัวอักษร)',d.name);if(n&&n.trim()){d.name=n.trim().slice(0,16);T2.save();if(T2.pushCloud)T2.pushCloud();key='';draw();}return}
+ const id=T2.petActive();
+ if(t.id==='pePet'){anim('a-jump');fx('💕',4);say(LINES[Math.random()*LINES.length|0]);return}
+ const a=t.dataset.act;if(!a||!id)return;
+ if(a==='none'){T2.petEquip(null);key='';draw();return}
+ if(a==='play'){anim('a-spin');fx('⭐',6);say('สนุกจัง!');return}
+ const r=T2.petAct(id,a);
+ if(a==='pat'){if(r==='ok'){anim('a-pat');fx('💕',6);say('ชอบจัง~');}else say('วันนี้ลูบครบแล้ว พรุ่งนี้นะ');}
+ if(a==='treat'){if(r==='ok'){anim('a-eat');fx('🍪',5);say('อร่อย! +10 ความผูกพัน');}else say(r);}
+ setTimeout(()=>{key='';draw();},900);});
+T2.on(draw);draw();});
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>เควส | Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4)</title>
+<meta name="theme-color" content="#0B2E5C">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="cq">
+<div id="lessonRoot"></div>
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/widgets.js?v=20261124cq2"></script><script src="js/w2.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script><script src="js/ico.js?v=20261124cq2"></script><script src="js/rpg.js?v=20261124cq2"></script><script src="js/rpg_l3.js?v=20261124cq2"></script><script src="js/rpg_l4.js?v=20261124cq2"></script><script src="js/photos.js?v=20261124cq2"></script><script src="js/scene.js?v=20261124cq2"></script><script src="js/w6.js?v=20261124cq2"></script><script src="js/classlive.js?v=20261124cq2"></script>
+<script>
+(function () {
+  const id = +new URLSearchParams(location.search).get('id') || 1;
+  const meta = LESSONS.find(l => l.id === id) || LESSONS[0];
+  const unit = UNITS.find(u => u.n === meta.unit);
+  document.title = `เควส ${ACT(meta.id)} ${meta.title} | ${COURSE.short}`;
+  const s = document.createElement('script'); const CL = new URLSearchParams(location.search).get('classic'); s.src = `js/lessons/l${meta.id}${!CL && (window.LITE_IDS || []).includes(meta.id) ? 'p' : ''}.js?v=20261124cq2`;
+  const gate = L => {
+    if (meta.ready || !L) return go(L);
+    let done = false;
+    const chk = () => { if (done || !T2.ready) return; done = true; if (T2.tview()) { go(L); T2.toast('กิจกรรมนี้ปิดอยู่สำหรับนักเรียน', T2.isTeacher() ? 'ครูกำลังดูตัวอย่าง • เปิดได้ที่เมนูครู' : 'กำลังดูตัวอย่างในมุมมองผู้เยี่ยมชมแบบครู'); } else go(null); };
+    T2.on(chk); chk();
+  };
+  s.onload = () => gate(window.LESSON); s.onerror = () => go(null);
+  addEventListener('DOMContentLoaded', () => { T2.boot('units'); document.head.appendChild(s); });
+
+  function go(L) {
+    if (L && L.lite && L.title) meta.title = L.title;
+    const root = document.getElementById('lessonRoot');
+    const prev = LESSONS.find(l => l.id === meta.id - 1), next = LESSONS.find(l => l.id === meta.id + 1);
+    const E = x => T2.esc(x == null ? '' : String(x));
+    root.style.setProperty('--uc', unit.color);
+    const hero = `<div class="lhero" style="--uc:${unit.color}"><div class="wrap">
+      <div class="crumb"><a href="index.html">หน้าแรก</a> › <a href="index.html#units">โลกที่ ${unit.n} ${unit.title}</a> › เควส ${ACT(meta.id)}</div>
+      <h1>${meta.title}</h1>
+      <div class="tags"><span>🗡️ เควส ${ACT(meta.id)}</span>${meta.date ? `<span>📅 ${meta.date}</span>` : ''}<span class="tv-only">🗂️ แผนที่ ${meta.plan || meta.id} • สัปดาห์ที่ ${meta.week}</span><span>⏱️ 90 นาที</span>${meta.mode ? `<span>👥 ${meta.mode}</span>` : ''}${meta.pts ? `<span>🏆 ${meta.pts} คะแนน</span>` : ''}${meta.ind.map(i => `<span>🎯 ${i}</span>`).join('')}${meta.ext ? '<span>✨ แผนขยายความรู้</span>' : ''}</div>
+      <div class="big-ico"><i data-lucide="${meta.icon}"></i></div></div></div>`;
+    const R = (window.LESSON_RES || {})[meta.id] || {};
+    const planBox = `<div class="plan-box"><div><small>รูปแบบการเรียนรู้</small><b>${meta.model || '-'}</b></div><div><small>ภาระงาน / ชิ้นงาน</small><b>${meta.task || '-'}</b></div><div><small>รูปแบบการทำงาน</small><b>${meta.mode || '-'}</b></div></div>`;
+    const LCm = (window.LESSON_COMP || {})[meta.id] || { c: [], main: [], attr: [] };
+    const compBox = `<div class="cmp-box"><h4>⚔️ สมรรถนะที่ได้ฝึกในเควสนี้</h4>
+        <div class="cmp-chips">${LCm.c.map(k => `<span style="--c:${COMPETENCIES[k].color}">${COMPETENCIES[k].icon} ${COMPETENCIES[k].full}</span>`).join('')}</div>
+        ${LCm.main.length ? `<ul>${LCm.main.map(m => `<li><b>${m[0]}</b> ${m[1]}</li>`).join('')}</ul>` : ''}
+        <div class="cmp-attr">🌟 คุณลักษณะอันพึงประสงค์: ${LCm.attr.map(a => `<span>${a}</span>`).join('')}</div></div>`;
+    let ipstHTML = `<section class="card lsec" id="s-ipst"><h2><span class="tile" style="--c1:#FCA5A5;--c2:#DC2626"><i data-lucide="tv"></i></span>สื่อ สสวท. • Project 14</h2>
+        <p class="muted" style="margin-top:-4px">คลิปบทเรียนจากโครงการ Project 14 ของสถาบันส่งเสริมการสอนวิทยาศาสตร์และเทคโนโลยี (สสวท.) ที่ตรงกับเนื้อหากิจกรรมนี้ ใช้ทบทวนหรือเรียนล่วงหน้า</p>
+        ${(R.v || []).length ? '<div data-w="__ipst"></div>' : ''}
+        ${R.book ? `<div class="book"><span class="em">📗</span><div><b>${R.book[0]}</b><small>${R.book[1]}</small></div></div>` : ''}
+        <div class="res">${IPST_SITES.concat((R.links || []).map(x => [x[0], 'แหล่งเรียนรู้เพิ่มเติม', x[1], 'external-link'])).map(r => `<a href="${r[2]}" target="_blank" rel="noopener"><span class="tile" style="--c1:#FDE68A;--c2:#D97706;width:42px;height:42px"><i data-lucide="${r[3]}"></i></span><span><b>${r[0]}</b><small>${r[1]}</small></span></a>`).join('')}</div></section>`;
+    if (window.NO_IPST || (L && L.lite)) ipstHTML = '';
+    const ipstDef = { __ipst: { type: 'videos', title: 'คลิป Project 14 (สสวท.)', list: (R.v || []).filter(id => IPST_VIDEOS[id]).map(id => ({ id, t: IPST_VIDEOS[id][0], ch: 'สสวท. • ' + IPST_VIDEOS[id][1], dur: IPST_VIDEOS[id][2] })) } };
+    if (!L) {
+      root.innerHTML = hero + `<div class="wrap" style="padding:40px 20px 80px"><div class="card lsec center"><div class="big-emoji">🚧</div><h2 style="justify-content:center">เควสนี้ยังไม่เปิด</h2><p class="muted">เควสจะเปิดตามลำดับการเรียนในแต่ละสัปดาห์</p>
+        ${planBox}${compBox}
+        <h3>ผลการเรียนรู้ของเควสนี้</h3>${meta.ind.map(i => `<div class="ind" style="text-align:left"><b>${i}</b><span>${INDICATORS[i]}</span></div>`).join('')}
+        <div class="row-center">${prev ? `<a class="btn ghost" href="lesson.html?id=${prev.id}">← เควส ${ACT(prev.id)}</a>` : ''}<a class="btn" href="index.html#units">กลับแผนที่โลก</a></div></div>
+        <div style="margin-top:22px">${ipstHTML}</div></div>`;
+      WIDGETS.mount(root, ipstDef, meta.id); T2.icons(); return;
+    }
+    window.LESSON_SECTIONS = window.LESSON_SECTIONS || {};
+    LESSON_SECTIONS[meta.id] = L.sections.length;
+    const lk = 'l' + meta.id;
+    /* ---------- จัดหัวข้อเข้าแท็บ: เนื้อหา → คลังสื่อ → ภารกิจในคาบเรียน → แบบทดสอบท้ายเควส → สรุปและ E-Ticket ---------- */
+    const isET = x => x.id === 'eticket' || /data-w="et"/.test(x.html || '');
+    const secHTML = sec => `<section class="card lsec" id="s-${sec.id}">
+        <h2><span class="tile" style="--c1:color-mix(in srgb,${unit.color} 60%,#fff);--c2:${unit.color}"><i data-lucide="${sec.icon || 'book-open'}"></i></span>${sec.phase ? `<span class="ph ph-${sec.phase} tv-only">${sec.phase}</span>` : ''}${sec.title}${sec.min ? `<small class="sec-min">⏱ ${sec.min} นาที</small>` : ''}</h2>
+        ${sec.html}
+        <div class="read-btn"><button class="btn sm" data-sec="${sec.id}"><i data-lucide="check"></i>เข้าใจแล้ว +${XP.section} XP</button></div></section>`;
+    const inTask = x => x.at === 'task' || (x.at == null && x.phase === 'Elaborate'), sContent = L.sections.filter(x => !isET(x) && !inTask(x)), sTask = L.sections.filter(x => !isET(x) && inTask(x)), sET = L.sections.filter(isET);
+    const short = t => (String(t).split(/[:：]/)[0] || t).replace(/^สัปดาห์ที่ \d+\s*•\s*/, '').trim();
+    const QEND = (L.quizEnd || [0, 1, 3, 4, 6]).map(i => L.quiz[i]).filter(Boolean);
+    const quiz = `<section class="card lsec" id="s-quiz"><h2><span class="tile" style="--c1:#FFD54A;--c2:#F59E0B"><i data-lucide="graduation-cap"></i></span>แบบทดสอบท้ายเควส</h2>
+        <p class="muted">${QEND.length} ข้อ • เกณฑ์ผ่าน 70% • ตอบถูก +${XP.quizPerItem} XP ตอบเร็วและต่อเนื่องได้โบนัส ถูกทุกข้อ +20 (ครั้งแรก) • ทำซ้ำได้ ระบบเก็บคะแนนสูงสุด </p>
+        <div data-w="__quiz"></div></section>`;
+    /* ---------- คลังสื่อ (ลำดับรายการคงเดิมเพื่อไม่ให้ความคืบหน้าเดิมของนักเรียนหาย) ---------- */
+    const GRX = /^https:\/\/docs\.google\.com\/(document|spreadsheets|presentation|drawings)\/d\/([\w-]{20,})/;
+    const RL = (L.resources || []).concat((R.v || []).filter(v => IPST_VIDEOS[v] && !(L.resources || []).some(r => r.url.includes(v))).map(v => ({ icon: 'tv', t: IPST_VIDEOS[v][0], sub: 'วีดิทัศน์ สสวท. • ' + IPST_VIDEOS[v][2], url: 'https://www.youtube.com/watch?v=' + v, c1: '#FCA5A5', c2: '#DC2626', cat: 'คลิปและภาพ' })));
+    L._res = RL;
+    const isWork = r => GRX.test(r.url) && !(/ใบความรู้|อ่านประกอบ/.test(r.t) && !/ใบกิจกรรม|ใบงาน/.test(r.t));
+    const catOf = r => r.cat || (/youtube\.com|youtu\.be/.test(r.url) || r.icon === 'tv' ? 'คลิปและภาพ' : /หนังสือ|บทความ|ใบความรู้/.test(r.t + (r.sub || '')) ? 'บทความและเอกสารอ่านประกอบ' : 'เว็บไซต์และเครื่องมือ');
+    const resCard = (r, k) => `<a href="${r.url}" target="_blank" rel="noopener" data-rs="${k}"><span class="tile" style="--c1:${r.c1 || '#7FA0FF'};--c2:${r.c2 || '#2D4FD6'};width:42px;height:42px"><i data-lucide="${r.icon}"></i></span><span><b>${r.t}</b><small>${r.sub || ''}</small></span></a>`;
+    const M = L.mission || {};
+    const libIdx = RL.map((r, k) => k).filter(k => !RL[k].hide && !(isWork(RL[k]) && !M.files));
+    const cats = []; libIdx.forEach(k => { const c = catOf(RL[k]); let g = cats.find(x => x.c === c); if (!g) cats.push(g = { c, ks: [] }); g.ks.push(k); });
+    const CATO = ['คลิปและภาพ', 'บทความและเอกสารอ่านประกอบ', 'เว็บไซต์และเครื่องมือ']; cats.sort((x, y) => (CATO.indexOf(x.c) + 9) % 9 - (CATO.indexOf(y.c) + 9) % 9);
+    const SL = L.slides || {};
+    const slideBtn = (href, t, sub, c1, c2, ico, lab) => `<a class="mfile" href="${href}" target="_blank" rel="noopener"><span class="tile" style="--c1:${c1};--c2:${c2}"><i data-lucide="${ico}"></i></span><span class="fc-t"><b>${t}</b><small>${sub}</small></span><span class="fc-b"><i data-lucide="external-link"></i>${lab}</span></a>`;
+    const slidesHTML = (SL.canva || SL.pdf) ? `<h3 class="lib-h">สไลด์ประกอบการเรียนรู้</h3><div class="fgrid">${SL.canva ? slideBtn(SL.canva, 'สไลด์ประกอบการเรียนรู้ CANVA', 'เปิดดูสไลด์บน Canva', '#C084FC', '#7C3AED', 'presentation', 'เปิดสไลด์') : ''}${SL.pdf ? slideBtn(SL.pdf, 'สไลด์ประกอบการเรียนรู้ PDF', 'เปิดดูในเบราว์เซอร์ Chrome ได้ทันที', '#FCA5A5', '#B91C1C', 'file-text', 'เปิด PDF') : ''}</div>` : '';
+    const lib = `<section class="card lsec" id="s-res"><h2><span class="tile" style="--c1:#86EFAC;--c2:#16A34A"><i data-lucide="library"></i></span>สื่อประกอบการเรียน</h2>
+        <p class="muted" style="margin-top:-6px">ภาพ คลิป บทความ และเว็บไซต์ที่เกี่ยวข้องกับเควสนี้ เลือกเปิดสำรวจได้ตามความสนใจ${RL.length ? ' • เปิดดูอย่างน้อย 70% รับ +20 XP' : ''}</p>
+        ${slidesHTML}
+        ${RL.length ? `<div class="res-p"><div class="rbar"><i id="resBar"></i></div><b id="resTxt">0%</b></div>` : '<p class="muted">เควสนี้ยังไม่มีสื่อเพิ่มเติม</p>'}
+        ${(L.gallery || []).length ? `<h3 class="lib-h">ภาพประกอบ</h3><div class="lib-gal">${L.gallery.map(g => `<figure><img src="${g.src}" alt="${E(g.t)}" loading="lazy"><figcaption><b>${g.t}</b>${g.credit ? `<small>${g.credit}</small>` : ''}</figcaption></figure>`).join('')}</div>` : ''}
+        ${cats.map(g => `<h3 class="lib-h">${g.c}</h3><div class="res">${g.ks.map(k => resCard(RL[k], k)).join('')}</div>`).join('')}</section>${ipstHTML}`;
+    /* ---------- ภารกิจในคาบเรียน: คำอธิบาย ไฟล์ทำสำเนา/ดาวน์โหลด ลิงก์ที่ใช้ทำกิจกรรม เกณฑ์การประเมิน และส่วนส่งงาน ---------- */
+    const KIND = { docx: ['file-text', '#7FA0FF', '#2B579A', 'download', 'ดาวน์โหลดไฟล์ Word'], pptx: ['presentation', '#FDBA74', '#C2410C', 'download', 'ดาวน์โหลดสไลด์'], slides: ['presentation', '#FDBA74', '#C2410C', 'external-link', 'เปิดสไลด์'], xlsx: ['file-spreadsheet', '#86EFAC', '#1D7A45', 'download', 'ดาวน์โหลดไฟล์ Excel'], pdf: ['file-text', '#FCA5A5', '#B91C1C', 'download', 'ดาวน์โหลด PDF'], gcopy: ['file-text', '#93C5FD', '#1D4ED8', 'copy', 'ทำสำเนาลงไดรฟ์ของฉัน'], gview: ['book-open', '#93C5FD', '#1D4ED8', 'external-link', 'เปิดอ่านคู่มือ'], link: ['external-link', '#C4B5FD', '#6D28D9', 'external-link', 'เปิดลิงก์'], ipynb: ['notebook-pen', '#FDBA74', '#D97706', 'download', 'ดาวน์โหลดสมุด Colab'], colab: ['notebook-pen', '#FDBA74', '#D97706', 'copy', 'ทำสำเนาลงไดรฟ์ของฉัน'] };
+    const fileCard = (f, extra) => { const m = GRX.exec(f.url || ''), kind = f.kind || (m ? 'gcopy' : 'link'), K = KIND[kind] || KIND.link, href = kind === 'gcopy' && m ? `https://docs.google.com/${m[1]}/d/${m[2]}/copy` : f.url, dl = K[3] === 'download';
+      return `<a class="mfile" href="${href}" ${dl ? `download="${E(f.name || '')}"` : 'target="_blank" rel="noopener"'} ${kind === 'gcopy' ? 'data-gc="1"' : ''} ${extra || ''}><span class="tile" style="--c1:${K[1]};--c2:${K[2]}"><i data-lucide="${f.icon || K[0]}"></i></span><span class="fc-t"><b>${f.t}</b><small>${f.sub || ''}</small></span><span class="fc-b"><i data-lucide="${K[3]}"></i>${K[4]}</span></a>`; };
+    const autoFiles = M.files ? [] : RL.map((r, k) => [r, k]).filter(x => isWork(x[0]));
+    const RB = L.rubric;
+    const rubricHTML = () => `<h3 style="margin-top:0">เกณฑ์การประเมิน • เควส ${ACT(meta.id)}</h3>` + (RB ? `<p class="muted" style="margin:0 0 8px">${RB.note || ''}</p><div style="overflow:auto"><table class="rb"><tr><th rowspan="2">รายการประเมิน</th><th colspan="3">ระดับคะแนน</th></tr><tr><th>3</th><th>2</th><th>1</th></tr>${RB.items.map((r, i) => `<tr><td><b>${i + 1}. ${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</table></div>
+        <p style="font-size:15px;margin:10px 0 0"><b>การแปลผล:</b> ${RB.levels.map(x => `${x[0]} คะแนน หมายถึง ${x[1]}`).join(' • ')}<br><b>เกณฑ์ผ่าน:</b> ${RB.pass}</p>` : '') + `<p style="font-size:15px;margin:10px 0 0"><b>การวัดและประเมินผลของเควส:</b> ${L.assess || meta.task || '-'}</p>`;
+    const sent = () => !!(T2.state.sent || {})[lk];
+    const filesHTML = ((M.files || autoFiles).length ? `<h3 class="lib-h">${M.open ? 'สไลด์ประกอบกิจกรรม' : 'ไฟล์สำหรับเควสนี้'}</h3><div class="fgrid">${M.files ? M.files.map(f => fileCard(f)).join('') : autoFiles.map(x => fileCard(x[0], `data-rs="${x[1]}"`)).join('')}</div>` : '') + ((M.links || []).length ? `<h3 class="lib-h">ลิงก์ที่ใช้ทำกิจกรรม</h3><div class="fgrid">${M.links.map(f => fileCard(Object.assign({ kind: 'link' }, f))).join('')}</div>` : '');
+    const task = `<section class="card lsec" id="s-task"><h2><span class="tile" style="--c1:#FDBA74;--c2:#EA580C"><i data-lucide="clipboard-list"></i></span>ภารกิจในคาบเรียน<button class="rb-btn" type="button" data-rubric title="ดูเกณฑ์การประเมิน"><i data-lucide="scale"></i>เกณฑ์การประเมิน</button></h2>
+        <p>${M.desc || `ชิ้นงานของเควสนี้คือ <b>${meta.task || '-'}</b> ลงมือทำตามหัวข้อที่เรียน แล้วส่งงานที่ส่วน “ส่งงาน” ด้านล่าง`}</p>
+        ${M.steps ? `<ol class="t-steps">${M.steps.map(x => `<li>${x}</li>`).join('')}</ol>` : ''}
+        ${M.open ? `<h3 class="lib-h">ไฟล์ที่ต้องเปิดวันนี้</h3><div class="fgrid open1">${M.open.map(f => fileCard(f)).join('')}</div>` : filesHTML}
+      </section>${sTask.map(secHTML).join('')}${M.open && filesHTML ? `<section class="card lsec" id="s-help" style="padding:14px 22px"><details class="lite-more"><summary>🧰 ตัวช่วย: สไลด์และลิงก์ (เปิดเมื่อต้องการ)</summary>${filesHTML}</details></section>` : ''}
+      <section class="card lsec submit" id="s-submit"><h2><span class="tile" style="--c1:#86EFAC;--c2:#15803D"><i data-lucide="send"></i></span>ส่งงาน</h2>
+        <p><b>งานที่ต้องส่ง:</b> ${M.submit || meta.task || '-'}</p>
+        <div class="row"><a class="btn green" id="crBtn" href="${COURSE.links.classroom}" target="_blank" rel="noopener"><i data-lucide="school"></i>เปิด Google Classroom เพื่อส่งงาน</a><button class="btn ghost" type="button" data-sent="${lk}" id="sentBtn"></button><span class="muted" id="sentTxt"></span></div></section>`;
+    /* ---------- สรุปรวบยอด + E-Ticket ---------- */
+    const SUM = L.summary || (L.kpa && L.kpa.K) || [];
+    const sum = `<section class="card lsec" id="s-sum"><h2><span class="tile" style="--c1:#C4B5FD;--c2:#6D28D9"><i data-lucide="list-checks"></i></span>สรุปรวบยอด</h2>
+        ${SUM.length ? `<ul class="sum-list">${SUM.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p class="muted">ทบทวนหัวข้อที่เรียนในกิจกรรมนี้อีกครั้งก่อนทำ E-Ticket</p>'}</section>${sET.map(secHTML).join('')}`;
+    const TABS = sContent.map(x => ({ id: x.id, ico: 'book-open', t: x.tab || short(x.title), secs: [x.id], html: secHTML(x) })).concat([
+      { id: 'lib', ico: 'library', t: 'สื่อประกอบการเรียน', secs: [], html: lib },
+      { id: 'task', ico: 'clipboard-list', t: 'ภารกิจในคาบเรียน', secs: sTask.map(x => x.id), html: task },
+      { id: 'quiz', ico: 'graduation-cap', t: 'แบบทดสอบท้ายเควส', secs: [], html: quiz },
+      { id: 'sum', ico: 'ticket', t: sET.length ? 'สรุปและ E-Ticket' : 'สรุปรวบยอด', secs: sET.map(x => x.id), html: sum }]);
+    const P5 = L.plan5e;
+    const liteTop = L.lite ? `<div class="card lsec" style="padding:16px 22px"><div class="lite-chips"><span>⏱ ${L.time || ''}</span>${meta.ind.map(i => `<span>🎯 ${i}</span>`).join('')}${(R.book || [])[1] ? `<span>📘 ${R.book[1]}</span>` : ''}</div>
+        <details class="lite-more"><summary>ℹ️ รายละเอียดเควส: ผลการเรียนรู้ • จุดประสงค์ K P A • การประเมิน</summary>
+        ${meta.ind.map(i => `<div class="ind"><b>${i}</b><span>${INDICATORS[i]}</span></div>`).join('')}
+        <div class="kpa"><div><b>K ความรู้</b><ul>${L.kpa.K.map(x => `<li>${x}</li>`).join('')}</ul></div><div><b>P ทักษะ/กระบวนการ</b><ul>${L.kpa.P.map(x => `<li>${x}</li>`).join('')}</ul></div><div><b>A เจตคติ</b><ul>${L.kpa.A.map(x => `<li>${x}</li>`).join('')}</ul></div></div>
+        <p style="font-size:14.5px"><b>การประเมิน (เกณฑ์เดียวกันทุกโหมด):</b> ${L.assess} <button class="rb-btn" type="button" data-rubric><i data-lucide="scale"></i>เกณฑ์การประเมิน</button></p>${planBox}${compBox}</details>
+        ${P5 ? `<details class="lite-more tv-only" style="margin-top:10px"><summary>🧑‍🏫 แนวการจัดการเรียนรู้ (${L.model5 || '5E'}) • สำหรับครู</summary><div style="overflow:auto"><table class="rb p5"><tr><th>ขั้น</th><th>เวลา</th><th>กิจกรรมของครู</th><th>กิจกรรมของนักเรียน</th><th>สื่อ / หลักฐาน</th></tr>${P5.map(r => `<tr><td><span class="ph ph-${r.ph}">${r.ph}</span><br><small>${r.th}</small></td><td style="white-space:nowrap">${r.min} นาที</td><td>${r.t}</td><td>${r.s}</td><td>${r.m}</td></tr>`).join('')}</table></div></details>` : ''}</div>` : '';
+    const tabBtn = (t, i) => `<button type="button" class="ltab" role="tab" data-tab="${t.id}" data-secs="${t.secs.join(',')}"><i data-lucide="${t.ico}"></i><span>${t.t}</span><em class="tck">✓</em></button>`;
+    root.innerHTML = hero + `<div class="wrap lgrid tabbed">
+      <aside class="card toc ltabs" id="ltabs"><h4>ความคืบหน้าเควสนี้</h4><div class="ltabs-p"><div class="lp"><i id="lp"></i></div><small class="muted" id="lpTxt"></small></div><div class="ltabs-in" role="tablist">${TABS.map(tabBtn).join('')}</div></aside>
+      <main class="lmain" id="lmain">${L.lite ? liteTop : `<div class="card lsec" style="padding:18px 22px">${planBox}${compBox}</div>`}
+        ${TABS.map((t, i) => `<div class="tpanel" data-tp="${t.id}" role="tabpanel">${t.html}
+          <div class="tnav">${i ? `<button class="btn ghost sm" type="button" data-go="${TABS[i - 1].id}">← ${TABS[i - 1].t}</button>` : '<span></span>'}${TABS[i + 1] ? `<button class="btn sm" type="button" data-go="${TABS[i + 1].id}">ถัดไป: ${TABS[i + 1].t} →</button>` : ''}</div></div>`).join('')}
+        <div class="lnav">${prev ? `<a class="btn ghost" href="lesson.html?id=${prev.id}">← เควส ${ACT(prev.id)}</a>` : '<span></span>'}${next ? `<a class="btn" href="lesson.html?id=${next.id}">เควส ${ACT(next.id)} : ${next.title} →</a>` : ''}</div>
+      </main></div>`;
+    const defs = Object.assign({}, L.widgets, ipstDef, { __quiz: { type: 'quiz', final: true, lid: lk, items: QEND } });
+    if (L.lite && !T2._mw0) { T2._mw0 = T2.markWidget; T2.markWidget = (k, xp, el) => { const m = T2.modeOf ? T2.modeOf(lk) : 2; const mult = /:(et|rpg|res70)$/.test(k) || !k.startsWith(lk + ':') ? 1 : [1, 1, 1.5, 2][m]; return T2._mw0(k, Math.round((xp || XP.widget) * mult), el); }; }
+    WIDGETS.mount(root, defs, meta.id);
+    /* ไฟล์งาน Google ในเนื้อหา (เอกสาร/ชีต/สไลด์) → ลิงก์ทำสำเนาลงไดรฟ์ของนักเรียนทันที (ใบความรู้เปิดอ่านตามเดิม) */
+    const gKind = a => { const m = (a.getAttribute('href') || '').match(GRX); if (!m) return null; const txt = a.textContent || ''; return /ใบความรู้|อ่านประกอบ/.test(txt) && !/ใบกิจกรรม|ใบงาน/.test(txt) ? null : m; };
+    const gCopy = a => { const m = gKind(a); if (!m || a.dataset.gc) return; a.dataset.gc = 1; a.href = `https://docs.google.com/${m[1]}/d/${m[2]}/copy`; a.title = 'กดแล้ว Google จะสร้างสำเนาไฟล์นี้ลงไดรฟ์ของนักเรียนให้ทันที';
+      const lab = document.createElement('span'); lab.className = 'gcopy'; lab.innerHTML = '⧉ ทำสำเนาให้ฉัน'; (a.querySelector('span:last-child') || a).appendChild(lab); };
+    root.querySelectorAll('a[href*="docs.google.com/"]').forEach(gCopy);
+    if (!window._gcHook) { window._gcHook = 1; document.addEventListener('click', e => { const a = e.target.closest && e.target.closest('a[href*="docs.google.com/"]'); if (a) gCopy(a); }, true); }
+    /* ---------- คลังสื่อ: นับการเปิดดู ---------- */
+    if (RL.length) {
+      const rk = k => lk + ':rs:' + k, rp = () => { const VIS = RL.map((r, k) => k).filter(k => !RL[k].hide), n = VIS.filter(k => T2.state.wid[rk(k)]).length, p = Math.round(n / (VIS.length || 1) * 100); const b = document.getElementById('resBar'); if (b) { b.style.width = p + '%'; document.getElementById('resTxt').textContent = p + '%'; } root.querySelectorAll('[data-rs]').forEach(a => a.classList.toggle('seen', !!T2.state.wid[rk(a.dataset.rs)])); if (p >= 70 && L.lite) T2.markWidget(lk + ':res70', 20, document.getElementById('s-res')); };
+      root.querySelectorAll('[data-rs]').forEach(a => a.addEventListener('click', () => { T2.state.wid[rk(a.dataset.rs)] = Date.now(); T2.save(); rp(); }));
+      T2.on(rp); rp();
+    }
+    /* ---------- แท็บ ---------- */
+    const TK = 't2_tab_' + lk; let cur = TABS[0].id;
+    const tabOfSec = sid => (TABS.find(t => t.secs.includes(sid)) || {}).id;
+    const tabOfHash = h => { if (!h || h.length < 2) return null; h = h.slice(1); if (h.startsWith('t-')) return TABS.some(t => t.id === h.slice(2)) ? h.slice(2) : null; const el = document.getElementById(h); const p = el && el.closest('.tpanel'); return p ? p.dataset.tp : null; };
+    const show = (tid, o = {}) => { if (!TABS.some(t => t.id === tid)) tid = TABS[0].id; cur = tid;
+      root.querySelectorAll('.tpanel').forEach(p => p.classList.toggle('on', p.dataset.tp === tid));
+      root.querySelectorAll('.ltab').forEach(b => { const on = b.dataset.tab === tid; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); if (on && b.scrollIntoView && !o.first) b.scrollIntoView({ block: 'nearest', inline: 'center' }); });
+      try { sessionStorage.setItem(TK, tid); } catch (e) { }
+      if (!o.keepHash) history.replaceState(null, '', location.pathname + location.search + '#t-' + tid);
+      if (!o.first) { const tp = root.querySelector('.tpanel.on'); if (tp) { const y = tp.getBoundingClientRect().top; if (y < 60 || y > innerHeight * .6) scrollTo({ top: y + scrollY - (innerWidth <= 900 ? 150 : 86) }); } dispatchEvent(new Event('resize')); }
+      if (T2.user && !(T2.isTeacherReal || T2.isTeacher)() && !o.first) { T2.state.at = { lid: lk, sec: LESSON_CUR(), ts: Date.now() }; T2.save(); } };
+    window.LESSON_CUR = () => { const t = TABS.find(x => x.id === cur) || TABS[0]; return t.secs[0] || (L.sections.find(x => x.id === cur) || L.sections[L.sections.length - 1]).id; };
+    root.addEventListener('click', e => { const b = e.target.closest('[data-tab]'), g = e.target.closest('[data-go]');
+      if (b) show(b.dataset.tab); else if (g) show(g.dataset.go);
+      if (e.target.closest('[data-rubric]')) T2.modal(rubricHTML(), { cls: 'wide' }); });
+    addEventListener('hashchange', () => { const t = tabOfHash(location.hash); if (t) { show(t, { keepHash: true }); const el = !location.hash.startsWith('#t-') && document.querySelector(location.hash); if (el) el.scrollIntoView(); } });
+    root.querySelectorAll('[data-sec]').forEach(b => b.onclick = () => { T2.markSection(meta.id, b.dataset.sec, b); upd(); });
+    const upd = () => {
+      const st = T2.state, q = st.quiz[lk];
+      root.querySelectorAll('[data-sec]').forEach(b => { if (st.sec[lk + ':' + b.dataset.sec]) { b.classList.add('done'); b.innerHTML = '✓ อ่านแล้ว'; } });
+      root.querySelectorAll('.ltab').forEach(b => { const k = b.dataset.tab, secs = b.dataset.secs ? b.dataset.secs.split(',') : [], secOK = secs.length && secs.every(x => st.sec[lk + ':' + x]);
+        b.classList.toggle('read', k === 'quiz' ? q != null : k === 'lib' ? !!st.wid[lk + ':res70'] : k === 'task' ? sent() && (!secs.length || secOK) : !!secOK); });
+      const cb = document.getElementById('crBtn'); if (cb) { const cw = ((window.CLASSROOM_WORK || {})[meta.id] || {})[T2.viewRoom ? T2.viewRoom() : st.room]; cb.href = cw ? `https://classroom.google.com/c/${cw[0]}/a/${cw[1]}/details` : COURSE.links.classroom; }
+      const sb = document.getElementById('sentBtn'); if (sb) { sb.textContent = sent() ? '↺ ยกเลิกการบันทึกว่าส่งแล้ว' : '✓ ฉันส่งแล้ว'; document.getElementById('sentTxt').textContent = sent() ? '✅ บันทึกว่าส่งงานแล้ว' : ''; }
+      const p = T2.lessonProgress(meta.id); document.getElementById('lp').style.width = p + '%';
+      document.getElementById('lpTxt').textContent = st.done[lk] ? '🏅 จบเควสนี้แล้ว' : `ความคืบหน้า ${p}% • อ่านทุกหัวข้อและทำแบบทดสอบให้ครบ`;
+    };
+    T2.on(upd); upd(); T2.icons();
+    if (L.lite && window.CLASS_LIVE) CLASS_LIVE(L, meta, root);
+    let first = tabOfHash(location.hash), saved = null; try { saved = sessionStorage.getItem(TK); } catch (e) { }
+    show(first || saved || TABS[0].id, { first: true, keepHash: !!first });
+    if (first && !location.hash.startsWith('#t-')) setTimeout(() => { const t = document.querySelector(location.hash); t && t.scrollIntoView(); }, 200);
+  }
+})();
+</script>
+</body>
+</html>

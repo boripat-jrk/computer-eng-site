@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>เควสรองตามสาย | Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4)</title>
+<meta name="theme-color" content="#0B2E5C">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="cq">
+<div class="lhero" style="--uc:#7C3AED"><div class="wrap"><div class="crumb"><a href="index.html">หน้าแรก</a> › เควสรองตามสาย</div><h1>🧭 เควสรองตามสาย</h1><div class="tags"><span>🎒 เลือกทำตามความสนใจ</span><span>⭐ ไม่บังคับ ไม่กระทบการผ่านเควสหลัก</span><span>🔁 ทำข้ามสายได้</span></div><div class="big-ico"><i data-lucide="compass"></i></div></div></div>
+<div class="wrap" style="margin-top:-40px;position:relative;z-index:2;padding-bottom:60px">
+  <div class="card lsec" style="padding:18px 22px"><div class="sq-tabs" id="sqTabs"></div><div id="sqBody"></div></div>
+</div>
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script>
+<script>
+addEventListener('DOMContentLoaded', () => {
+  T2.boot('side');
+  const SQ = window.SIDE_QUESTS, KEYS = Object.keys(SQ), SQ_XP = [0, 30, 45, 60];
+  let cur = KEYS.includes(location.hash.slice(1)) ? location.hash.slice(1) : null;
+  const render = () => {
+    const s = T2.state, mine = (s.hero || {}).cls; if (!cur) cur = KEYS.includes(mine) ? mine : KEYS[0];
+    const done = s.sq || {};
+    document.getElementById('sqTabs').innerHTML = KEYS.map(k => { const c = HERO_CLASSES[k]; return `<button type="button" class="sq-tab ${k === cur ? 'on' : ''}" style="--uc:${c.c1}" data-k="${k}">${c.name}${k === mine ? '<em>สายของฉัน</em>' : ''}</button>`; }).join('');
+    const c = HERO_CLASSES[cur], P = SQ[cur];
+    document.getElementById('sqBody').innerHTML = `<div style="--uc:${c.c1}">
+      <div class="card sq-head"><span class="cq-av">${heroSVG({ cls: cur, skin: (s.hero || {}).skin || 0, style: (s.hero || {}).style || 0, hc: (s.hero || {}).hc || 0, g: (s.hero || {}).g }, T2.lv(), 100)}</span>
+        <div><h2>${c.name}<small>${c.th}</small></h2><p>${c.desc}</p><p>${c.why}</p></div></div>
+      <div class="sq-list">${P.q.map((q, i) => { const k = cur + i, ok = !!done[k]; return `<div class="card sq-card ${ok ? 'ok' : ''}">
+        <div class="num">เควสรองที่ ${i + 1} • ${'⭐'.repeat(q.lv)} • +${SQ_XP[q.lv]} XP</div><h3>${q.t}</h3><p>${q.d}</p>
+        <div class="sq-out">🎒 <b>ชิ้นงาน:</b> ${q.out}</div>
+        <div class="row"><button type="button" class="btn sm ${ok ? 'ghost' : 'gold'}" data-sq="${k}" data-lv="${q.lv}">${ok ? '↺ ยกเลิกการบันทึก' : '✓ ฉันทำเควสนี้แล้ว'}</button>${ok ? '<span class="muted">✅ บันทึกแล้ว รอครูตรวจชิ้นงาน</span>' : ''}</div></div>`; }).join('')}</div>
+      <div class="card sq-next"><h3>🚀 ชอบสายนี้ ต่อยอดไปทางไหนได้บ้าง</h3><div class="sq-steps">${P.next.map((x, i) => (i ? '<i>→</i>' : '') + `<span>${x}</span>`).join('')}</div></div></div>`;
+    T2.icons();
+  };
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-k]'); if (t) { cur = t.dataset.k; history.replaceState(null, '', '#' + cur); render(); return; }
+    const b = e.target.closest('[data-sq]'); if (!b) return;
+    if (T2.guest()) { T2.toast('เข้าสู่ระบบก่อนจึงจะบันทึกได้', '', 'err'); return; }
+    const s = T2.state; s.sq = s.sq || {}; const k = b.dataset.sq;
+    if (s.sq[k]) { delete s.sq[k]; T2.save(); } else { s.sq[k] = Date.now(); T2.save(); T2.markWidget('sq:' + k, SQ_XP[+b.dataset.lv], b); }
+    render();
+  });
+  T2.on(render); render();
+});
+</script>
+</body>
+</html>

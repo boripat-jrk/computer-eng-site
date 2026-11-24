@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ภารกิจทั้งหมด | Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4)</title>
+<meta name="theme-color" content="#0B2E5C">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="cq">
+<div class="lhero"><div class="wrap"><div class="crumb"><a href="index.html">หน้าแรก</a> › ภารกิจทั้งหมด</div><h1>🎯 ภารกิจทั้งหมด</h1><div class="tags"><span>📋 งานทุกชิ้นแยกตามกิจกรรม</span><span>📝 แบบทดสอบประจำหน่วย</span><span>↗️ ปุ่มเปิดในแท็บใหม่</span></div><div class="big-ico"><i data-lucide="target"></i></div></div></div>
+<div class="wrap" style="margin-top:-40px;position:relative;z-index:2;padding-bottom:60px"><div class="card mtabs" id="mtabs"></div><div class="row" style="justify-content:flex-end;margin:0 0 12px"><button class="btn sm ghost" data-all="1">▾ ขยายทั้งหมด</button><button class="btn sm ghost" data-all="0">▸ ย่อทั้งหมด</button></div><div id="mlist"><p class="muted">กำลังโหลด...</p></div></div>
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/widgets.js?v=20261124cq2"></script><script src="js/w2.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script>
+<script>
+addEventListener('DOMContentLoaded',()=>{T2.boot('missions');
+const KEY='t2-acc';let acc={};try{acc=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const E=s=>T2.esc(s==null?'':String(s));
+const utRow=u=>{const open=T2.unitOpen(u.n),best=(T2.state.quiz||{})['u'+u.n],done=best!=null&&best>=7;
+ return `<div class="arow2 ${done?'done':''}" id="ut-${u.n}"><span class="st">${done?'✅':open?'⬜':'🔒'}</span><div><b>📝 แบบทดสอบประจำหน่วยที่ ${u.n} ${E(u.short)} (10 ข้อ)</b><div class="d">${best!=null?`คะแนนสูงสุด ${best}/10 • ผ่านเมื่อถูก 7 ข้อขึ้นไป`:open?'ยังไม่ได้ทำ • ผ่านเมื่อถูก 7 ข้อขึ้นไป':'เปิดเมื่อครบทุกกิจกรรมในหน่วย'}</div></div><div class="act">${open?`<a class="btn sm ${done?'ghost':''}" href="unit.html?u=${u.n}#test" target="_blank" rel="noopener">${done?'↺ ทำอีกครั้ง':'📝 ทำแบบทดสอบประจำหน่วย'}</a>`:''}</div></div>`};
+const accHTML=l=>{const u=UNITS.find(x=>x.n===l.unit),open=!!l.ready,it=T2.missionItems(l),p=open?T2.missionPct(l):0,exp=acc[l.id]??(open&&p<100);
+ return `<div class="card acc ${exp?'exp':''} ${open?'':'locked'}" style="--uc:${u.color}" id="acc-${l.id}"><button class="acc-h" data-acc="${l.id}" aria-expanded="${exp}"><span class="chev">${exp?'▾':'▸'}</span><span class="ai"><i data-lucide="${l.icon}"></i></span><span class="acc-t"><small>เควส ${ACT(l.id)}</small><b>${E(l.title)}</b></span><span class="acc-p">${open?`<span class="pbar"><i style="width:${p}%"></i></span><b>${p}%</b><small>${it.filter(x=>x.done).length}/${it.length}</small>`:'<span class="pill soon">🔒 ยังไม่เปิด</span>'}</span></button>
+ <div class="acc-b">${it.map(x=>`<div class="arow2 ${x.done?'done':''}"><span class="st">${x.done?'✅':open?'⬜':'🔒'}</span><div><b>${x.em} ${E(x.t)}</b><div class="d">${E(x.d)}</div></div><div class="act">${open?x.b.join(''):''}</div></div>`).join('')}${u.lessons[u.lessons.length-1]===l.id?utRow(u):''}</div></div>`};
+const utTab=u=>{const open=T2.unitOpen(u.n),best=(T2.state.quiz||{})['u'+u.n];
+ return `<a href="#ut-${u.n}" data-ut="${u.n}" class="mt ut ${open?'':'off'}" title="แบบทดสอบประจำหน่วยที่ ${u.n} ${E(u.short)}"><b>📝</b><span>${best!=null?best+'/10':open?'ทดสอบ':'🔒'}</span></a>`};
+const draw=()=>{
+ document.getElementById('mtabs').innerHTML=UNITS.map(u=>`<div class="mt-g" style="--uc:${u.color}"><button class="mt-u" data-ug="${u.n}" title="ไปหน่วยที่ ${u.n} ${E(u.short)}">หน่วย ${u.n}</button>${LESSONS.filter(l=>l.unit===u.n).map(l=>`<a href="#acc-${l.id}" data-jump="${l.id}" class="mt ${l.ready?'':'off'}" title="${E(l.title)}"><b>${ACT(l.id)}</b><span>${l.ready?T2.missionPct(l)+'%':'🔒'}</span></a>`).join('')}${utTab(u)}</div>`).join('');
+ document.getElementById('mlist').innerHTML=(T2.user?'':'<div class="announce"><i data-lucide="log-in"></i><div><b>เข้าสู่ระบบเพื่อบันทึกความคืบหน้า</b><p>ความคืบหน้าตอนนี้เก็บไว้ในเครื่องนี้เท่านั้น</p></div></div>')+UNITS.map(u=>`<div class="ugrp" id="ug-${u.n}" style="--uc:${u.color}"><h3 class="uhd"><i data-lucide="${u.icon}"></i>หน่วยที่ ${u.n} ${E(u.title)}</h3><div class="asg">${LESSONS.filter(l=>l.unit===u.n).map(accHTML).join('')}</div></div>`).join('');
+ T2.icons();};
+document.addEventListener('click',e=>{const ug=e.target.closest('[data-ug]');if(ug){document.getElementById('ug-'+ug.dataset.ug).scrollIntoView({behavior:'smooth',block:'start'});return}
+ const ut=e.target.closest('[data-ut]');if(ut){e.preventDefault();const uu=UNITS.find(x=>x.n===+ut.dataset.ut);acc[uu.lessons[uu.lessons.length-1]]=true;draw();document.getElementById('ut-'+ut.dataset.ut).scrollIntoView({behavior:'smooth',block:'center'});return}
+ const a=e.target.closest('[data-acc]');if(a){const id=+a.dataset.acc;acc[id]=a.getAttribute('aria-expanded')!=='true';localStorage.setItem(KEY,JSON.stringify(acc));draw();return}
+ const al=e.target.closest('[data-all]');if(al){LESSONS.forEach(l=>acc[l.id]=al.dataset.all==='1');localStorage.setItem(KEY,JSON.stringify(acc));draw();return}
+ const j=e.target.closest('[data-jump]');if(j){e.preventDefault();acc[+j.dataset.jump]=true;draw();document.getElementById('acc-'+j.dataset.jump).scrollIntoView({behavior:'smooth',block:'center'})}});
+T2.on(draw);draw();
+});
+</script>
+</body>
+</html>

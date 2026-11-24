@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>เช็คชื่อ | Code Quest • เตรียมวิศวกรรมคอมพิวเตอร์ (ม.4)</title>
+<meta name="theme-color" content="#0B2E5C">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/style.css?v=20261124cq2">
+<script src="js/icons.js?v=20261124cq2"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+</head>
+<body class="cq">
+<main class="wrap pt-wrap" id="at"><p class="muted">กำลังโหลด...</p></main>
+<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script>
+<script>
+addEventListener('DOMContentLoaded',()=>{T2.boot('att');
+const E=s=>T2.esc(s==null?'':String(s)),box=document.getElementById('at');
+const ST={P:['มา','✅','#16A34A'],L:['สาย','⏰','#D97706'],A:['ขาด','❌','#DC2626'],E:['ลา','📝','#2563EB']},CYC=['P','L','A','E'];
+const today=()=>new Date(Date.now()+7*36e5).toISOString().slice(0,10);
+let tab=sessionStorage.getItem('at-tab')||'check',room=sessionStorage.getItem('at-room')||ROOMS[0],day=today(),D=null,loading=false,draft={},dirty=false,touched=false,asel=new Set();
+const thd=d=>new Date(d+'T00:00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
+const load=async()=>{const {db,collection,getDocs}=T2.fb;const g=async c=>(await getDocs(collection(db,c))).docs;const [u,b,r]=await Promise.all([g('users'),g('bonus'),g('roster')]);
+ const bonus={};b.forEach(d=>bonus[d.id]=d.data());const ro={};r.forEach(d=>ro[d.id]=d.data());
+ D={bonus,users:u.map(d=>Object.assign({id:d.id},d.data())).filter(x=>!TEACHER_EMAILS.includes((x.email||'').toLowerCase())).map(x=>{const rr=ro[(x.email||'').toLowerCase()]||{};return Object.assign(x,{_room:rr.room||x.room||'-',_no:+(rr.no||x.no)||999,_name:rr.name||x.name||'',_nick:rr.nickname||x.nickname||''});})};
+ initDraft();draw();};
+const list=()=>D.users.filter(u=>u._room===room).sort((a,b)=>a._no-b._no||String(a._nick).localeCompare(b._nick,'th'));
+const attOf=u=>((D.bonus[u.id]||{}).att)||{};
+const initDraft=()=>{touched=false;asel.clear();draft={};let saved=false;list().forEach(u=>{const v=attOf(u)[day];if(v)saved=true;draft[u.id]=v||'P';});dirty=!saved;};
+const cnt=()=>{const c={P:0,L:0,A:0,E:0};Object.values(draft).forEach(v=>c[v]++);return c;};
+const checkView=()=>{const L=list(),c=cnt(),saved=L.some(u=>attOf(u)[day]),n=asel.size;
+ return `<div class="row at-bar"><label>วันที่ <input type="date" id="atDay" value="${day}" max="${today()}"></label><button class="btn sm ghost" data-selall>☑️ เลือกทั้งห้อง</button><button class="btn sm ghost" data-selclr ${n?'':'disabled'}>ล้างที่เลือก</button><button class="btn sm ghost" data-all="P">✅ ทุกคนมา</button><span class="at-state ${dirty?'warn':'ok'}">${dirty?(saved?'● มีการแก้ไขที่ยังไม่บันทึก':'● ยังไม่ได้บันทึกวันนี้'):'✓ บันทึกแล้ว'}</span></div>
+ <div class="at-pick ${n?'armed':''}"><div class="at-pick-h">${n?`ตั้งสถานะให้ <b>${n} คน</b> ที่เลือก`:'① แตะเลือกนักเรียนด้านล่าง (เลือกได้หลายคน) ② กดสถานะที่นี่'}</div>
+  <div class="at-sum">${CYC.map(k=>`<button data-set="${k}" style="--c:${ST[k][2]}" ${n?'':'disabled'}><b>${c[k]}</b><span>${ST[k][1]} ${ST[k][0]}</span></button>`).join('')}<div class="at-pct"><b>${L.length?Math.round((c.P+c.L)/L.length*100):0}%</b><span>มาเรียน</span></div></div></div>
+ ${L.length?`<div class="at-grid">${L.map(u=>{const v=draft[u.id],on=asel.has(u.id);return `<button class="at-c st-${v} ${on?'sel':''}" data-u="${u.id}" style="--c:${ST[v][2]}"><span class="at-ck">${on?'✓':''}</span><span class="at-no">${u._no<999?u._no:'–'}</span><span class="at-n"><b>${E(u._nick||u.nick||'-')}</b><small>${E(u._name)}</small></span><span class="at-s">${ST[v][1]}<small>${ST[v][0]}</small></span></button>`}).join('')}</div>`:'<p class="muted">ยังไม่มีนักเรียนห้องนี้เข้าใช้งาน</p>'}
+ <div class="at-save"><button class="btn gold lg" id="atSave" ${L.length?'':'disabled'}>💾 บันทึกการเช็คชื่อ ${E(room)} • ${thd(day)}</button></div>`;};
+const reportView=()=>{const L=list(),dates=[...new Set(L.flatMap(u=>Object.keys(attOf(u))))].sort();
+ const rows=L.map(u=>{const a=attOf(u),c={P:0,L:0,A:0,E:0};dates.forEach(d=>{if(a[d])c[a[d]]++;});const tot=dates.filter(d=>a[d]).length,pct=tot?Math.round((c.P+c.L)/tot*100):100;return {u,a,c,tot,pct};});
+ const risk=rows.filter(r=>r.tot&&r.pct<80);
+ return `<div class="row at-bar"><span class="muted">เช็คชื่อแล้ว ${dates.length} ครั้ง</span><button class="btn sm ghost" id="atCsv" ${dates.length?'':'disabled'}>⬇ ดาวน์โหลด CSV</button></div>
+ ${risk.length?`<div class="announce urgent"><i data-lucide="triangle-alert"></i><div><b>เวลาเรียนต่ำกว่า 80% (เสี่ยง มส.) ${risk.length} คน</b><p>${risk.map(r=>`${r.u._no<999?r.u._no+'. ':''}${E(r.u._nick||r.u.nick)} (${r.pct}%)`).join(' • ')}</p></div></div>`:''}
+ ${dates.length?`<div class="card at-rep"><table class="board at-t"><tr><th>เลขที่</th><th>นักเรียน</th>${dates.slice(-14).map(d=>`<th class="d" title="${d}">${new Date(d+'T00:00:00').getDate()}/${new Date(d+'T00:00:00').getMonth()+1}</th>`).join('')}<th>มา</th><th>สาย</th><th>ขาด</th><th>ลา</th><th>%</th></tr>
+ ${rows.map(r=>`<tr class="${r.tot&&r.pct<80?'risk':''}"><td>${r.u._no<999?r.u._no:'–'}</td><td><b>${E(r.u._nick||r.u.nick)}</b><br><small class="muted">${E(r.u._name)}</small></td>${dates.slice(-14).map(d=>`<td class="d">${r.a[d]?ST[r.a[d]][1]:'·'}</td>`).join('')}<td>${r.c.P}</td><td>${r.c.L}</td><td>${r.c.A}</td><td>${r.c.E}</td><td><b>${r.pct}%</b></td></tr>`).join('')}
+ <tr class="sum"><td></td><td><b>รวมรายวัน (มา)</b></td>${dates.slice(-14).map(d=>`<td class="d">${rows.filter(r=>r.a[d]==='P'||r.a[d]==='L').length}</td>`).join('')}<td colspan="5"></td></tr></table>${dates.length>14?`<p class="muted" style="margin:8px 0 0;font-size:13px">แสดง 14 ครั้งล่าสุด • ไฟล์ CSV มีครบทุกครั้ง</p>`:''}</div>`:'<p class="muted">ยังไม่มีข้อมูลการเช็คชื่อของห้องนี้</p>'}`;};
+const draw=()=>{if(!T2.ready)return;if(!T2.isTeacher()){box.innerHTML='<div class="pt-empty card"><div class="big-emoji">🔒</div><h2>สำหรับครูเท่านั้น</h2></div>';return;}
+ if(!D){box.innerHTML='<p class="muted">กำลังโหลดรายชื่อ...</p>';if(!loading){loading=true;load().catch(e=>box.innerHTML='<p class="muted">โหลดไม่สำเร็จ '+E(e.code||'')+'</p>');}return;}
+ box.innerHTML=`<div class="pt-head"><div><small class="kick">ATTENDANCE • ครู</small><h1>เช็คชื่อ</h1><p class="muted">เก็บในระบบของรายวิชา • ดูรายงานรายห้องและสรุปเวลาเรียนได้ทันที</p></div>
+ <div class="pt-tabs">${[['check','✅ เช็คชื่อ'],['report','📊 รายงาน']].map(([k,t])=>`<button data-tab="${k}" class="${k===tab?'on':''}">${t}</button>`).join('')}</div></div>
+ <div class="tabs pt-rooms">${ROOMS.map(r=>`<button data-room="${r}" class="${r===room?'on':''}">${r} <small>${D.users.filter(u=>u._room===r).length}</small></button>`).join('')}</div>
+ ${tab==='check'?checkView():reportView()}`;T2.icons();};
+const save=async()=>{const {db,doc,setDoc}=T2.fb,b=document.getElementById('atSave');b.disabled=true;b.textContent='กำลังบันทึก...';
+ try{await Promise.all(list().map(async u=>{const v=draft[u.id];await setDoc(doc(db,'bonus',u.id),{att:{[day]:v},email:u.email||''},{merge:true});D.bonus[u.id]=Object.assign({},D.bonus[u.id]||{});D.bonus[u.id].att=Object.assign({},D.bonus[u.id].att||{},{[day]:v});}));
+  dirty=touched=false;const c=cnt();T2.toast(`บันทึกเช็คชื่อ ${room} แล้ว`,`มา ${c.P} • สาย ${c.L} • ขาด ${c.A} • ลา ${c.E}`);}catch(e){T2.toast('บันทึกไม่สำเร็จ',e.code||'','err');}draw();};
+const csv=()=>{const L=list(),dates=[...new Set(L.flatMap(u=>Object.keys(attOf(u))))].sort();const rows=[['เลขที่','ชื่อเล่น','ชื่อ-สกุล',...dates,'มา','สาย','ขาด','ลา','ร้อยละ']];
+ L.forEach(u=>{const a=attOf(u),c={P:0,L:0,A:0,E:0};dates.forEach(d=>a[d]&&c[a[d]]++);const tot=dates.filter(d=>a[d]).length;rows.push([u._no<999?u._no:'',u._nick||u.nick||'',u._name,...dates.map(d=>a[d]?ST[a[d]][0]:''),c.P,c.L,c.A,c.E,tot?Math.round((c.P+c.L)/tot*100):'']);});
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(',')).join('\n')],{type:'text/csv'}));a.download=`เช็คชื่อ-${room.replace('/','-')}.csv`;a.click();};
+document.addEventListener('click',e=>{if(!D)return;const t=e.target.closest('[data-tab],[data-room],[data-u],[data-all],[data-set],[data-selall],[data-selclr],#atSave,#atCsv');if(!t)return;
+ if(t.dataset.tab){tab=t.dataset.tab;sessionStorage.setItem('at-tab',tab);}
+ else if(t.dataset.room){room=t.dataset.room;sessionStorage.setItem('at-room',room);initDraft();}
+ else if(t.dataset.u){asel.has(t.dataset.u)?asel.delete(t.dataset.u):asel.add(t.dataset.u);}
+ else if(t.dataset.set){asel.forEach(id=>draft[id]=t.dataset.set);const n=asel.size;asel.clear();dirty=touched=true;T2.toast(`${ST[t.dataset.set][1]} ${ST[t.dataset.set][0]} • ${n} คน`,'อย่าลืมกดบันทึก');}
+ else if(t.hasAttribute('data-selall')){list().forEach(u=>asel.add(u.id));}
+ else if(t.hasAttribute('data-selclr')){asel.clear();}
+ else if(t.dataset.all){list().forEach(u=>draft[u.id]=t.dataset.all);asel.clear();dirty=touched=true;}
+ else if(t.id==='atSave'){save();return;}else if(t.id==='atCsv'){csv();return;}
+ draw();});
+document.addEventListener('change',e=>{if(e.target.id==='atDay'&&e.target.value){day=e.target.value;initDraft();draw();}});
+addEventListener('beforeunload',e=>{if(touched){e.preventDefault();e.returnValue='';}});
+let first=true;T2.on(()=>{if(T2.ready&&first){first=false;draw();}});draw();});
+</script>
+</body>
+</html>
