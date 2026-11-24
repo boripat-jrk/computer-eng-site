@@ -1,7 +1,13 @@
-/* เว็บ ม.4 Code Quest ใช้ฐานข้อมูล Firebase แยกจากเว็บ ม.2 และ ม.6
-   ฉบับร่าง: ยังไม่เชื่อมฐานข้อมูล (FIREBASE_CONFIG = null) ความคืบหน้าเก็บในเครื่องที่เปิดเท่านั้น
-   เมื่อสร้างโปรเจกต์ Firebase ใหม่แล้ว ให้ใส่ค่าการเชื่อมต่อของโปรเจกต์นั้นแทน null */
-window.FIREBASE_CONFIG = null;
+/* เว็บ ม.4 Code Quest ใช้โปรเจกต์ Firebase ของตัวเอง (computer-eng-kw) แยกจากเว็บ ม.2 และ ม.6
+   ค่านี้เปิดเผยได้ตามปกติของ Firebase Web ความปลอดภัยควบคุมด้วย Firestore Rules */
+window.FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyDcYyj8BXLKLjKJOAlgzmmJ7HEkoK3uKHU',
+  authDomain: 'computer-eng-kw.firebaseapp.com',
+  projectId: 'computer-eng-kw',
+  storageBucket: 'computer-eng-kw.firebasestorage.app',
+  messagingSenderId: '376427093415',
+  appId: '1:376427093415:web:6e9e7d762ce4c5e8aeea82'
+};
 /* อีเมลครูที่เข้าแดชบอร์ดได้ */
 window.TEACHER_EMAILS = ['kruboripat.jrk@gmail.com', 'boripat@kw.ac.th'];
 /* ห้องเรียนที่ให้นักเรียนเลือก (นักเรียนกลุ่มเตรียมวิศวกรรมคอมพิวเตอร์มาจากหลายห้อง) */

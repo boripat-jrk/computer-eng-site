@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#0B2E5C">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231F77D0'/><text x='50' y='67' font-size='46' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CQ</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="css/style.css?v=20261124cq2">
-<script src="js/icons.js?v=20261124cq2"></script>
-<link rel="stylesheet" href="css/cq.css?v=20261124cq2">
+<link rel="stylesheet" href="css/style.css?v=20261124cq3">
+<script src="js/icons.js?v=20261124cq3"></script>
+<link rel="stylesheet" href="css/cq.css?v=20261124cq3">
 </head>
 <body class="cq">
 <div class="lhero" id="uhero"><div class="wrap"><div class="crumb"><a href="index.html">หน้าแรก</a> › <a href="index.html#units">หน่วยการเรียน</a> › <span id="ucrumb">หน่วยการเรียนรู้</span></div><h1 id="utitle">หน่วยการเรียนรู้</h1><div class="tags" id="utags"></div><div class="big-ico" id="uico"><i data-lucide="map"></i></div></div></div>
 <div class="wrap" style="margin-top:-40px;position:relative;z-index:2;padding-bottom:60px" id="upage"><p class="muted">กำลังโหลด...</p></div>
-<script src="js/config.js?v=20261124cq2"></script><script src="js/data.js?v=20261124cq2"></script><script src="js/hero.js?v=20261124cq2"></script><script src="js/core.js?v=20261124cq2"></script><script src="js/widgets.js?v=20261124cq2"></script><script src="js/w2.js?v=20261124cq2"></script><script src="js/addons.js?v=20261124cq2"></script><script src="js/live.js?v=20261124cq2"></script><script src="js/v3.js?v=20261124cq2"></script><script src="js/v4.js?v=20261124cq2"></script><script src="js/v5.js?v=20261124cq2"></script><script src="js/pets.js?v=20261124cq2"></script>
+<script src="js/config.js?v=20261124cq3"></script><script src="js/data.js?v=20261124cq3"></script><script src="js/hero.js?v=20261124cq3"></script><script src="js/core.js?v=20261124cq3"></script><script src="js/widgets.js?v=20261124cq3"></script><script src="js/w2.js?v=20261124cq3"></script><script src="js/addons.js?v=20261124cq3"></script><script src="js/live.js?v=20261124cq3"></script><script src="js/v3.js?v=20261124cq3"></script><script src="js/v4.js?v=20261124cq3"></script><script src="js/v5.js?v=20261124cq3"></script><script src="js/pets.js?v=20261124cq3"></script>
 <script>
 addEventListener('DOMContentLoaded',()=>{T2.boot('units');
 const n=+new URLSearchParams(location.search).get('u')||1,u=UNITS.find(x=>x.n===n)||UNITS[0],I=UNIT_INFO[u.n]||{},spec=UNIT_TESTS[u.n],E=s=>T2.esc(s==null?'':String(s)),pg=document.getElementById('upage');
@@ -22,7 +22,7 @@ document.getElementById('utitle').textContent=`หน่วยที่ ${u.n} $
 document.getElementById('uhero').style.setProperty('--uc',u.color);document.getElementById('uico').innerHTML=`<i data-lucide="${u.icon}"></i>`;
 document.getElementById('utags').innerHTML=`<span>🗺️ โลกที่ ${u.n}</span><span>📚 ${u.strand}</span><span>⏱️ ${u.hours} ชั่วโมง</span><span>⭐ ${u.pts} คะแนน</span>`;
 const ls=LESSONS.filter(l=>l.unit===u.n),inds=[...new Set(ls.flatMap(l=>l.ind))];
-const load=id=>new Promise(r=>{const s=document.createElement('script');s.src=`js/lessons/l${id}.js?v=20261124cq2`;s.onload=()=>r(window.LESSON);s.onerror=()=>r(null);document.head.appendChild(s);});
+const load=id=>new Promise(r=>{const s=document.createElement('script');s.src=`js/lessons/l${id}.js?v=20261124cq3`;s.onload=()=>r(window.LESSON);s.onerror=()=>r(null);document.head.appendChild(s);});
 const nav=()=>{const i=UNITS.indexOf(u),p=UNITS[i-1],x=UNITS[i+1];return `<div class="u-nav">${p?`<a class="btn ghost" href="unit.html?u=${p.n}">← หน่วยที่ ${p.n} ${E(p.short)}</a>`:'<span></span>'}${x?`<a class="btn ghost" href="unit.html?u=${x.n}">หน่วยที่ ${x.n} ${E(x.short)} →</a>`:''}</div>`};
 let built=false;
 const draw=()=>{if(!T2.ready)return;const s=T2.state,done=ls.filter(l=>(s.done||{})['l'+l.id]).length,open=spec&&T2.unitOpen(u.n),best=(s.quiz||{})['u'+u.n];
