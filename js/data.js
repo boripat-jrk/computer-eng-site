@@ -14,14 +14,17 @@ window.COURSE = {
   links: {
     main: 'https://boripat.com',
     score: 'https://boripat.com/score',
-    classroom: 'https://classroom.google.com',
+    classroom: 'https://classroom.google.com/c/ODk5OTQ2MTM4NjEx',
     rooms: {},
     drive: 'https://drive.google.com/drive/folders/1kpTT3YzrvAJUZR-4E-fDvZtTrL5l7TV2',
     colab: 'https://colab.research.google.com/',
     py101: 'https://www.cp.eng.chula.ac.th/~somchai/python101/index.html'
   }
 };
-window.CLASSROOM_WORK = {};
+/* ม.4 มี Google Classroom ห้องเดียวสำหรับทุกห้องเรียน: เลขเควส → [รหัสชั้นเรียน, รหัสงาน] */
+window.CQ_CLASS = 'ODk5OTQ2MTM4NjEx';
+window.CQ_WORK = { 1: 'ODkxNTkwMTQ3Mzkw' };
+window.CLASSROOM_WORK = (() => { const o = {}; Object.entries(CQ_WORK).forEach(([lid, aid]) => { o[lid] = {}; ROOMS.forEach(r => o[lid][r] = [CQ_CLASS, aid]); }); return o; })();
 window.NO_IPST = true;
 window.IPST_SITES = [];
 window.IPST_VIDEOS = {};
@@ -41,7 +44,7 @@ window.UNITS = [
    mode = รูปแบบการทำงาน • star3 = ความท้าทาย 3 ดาว • ready = เปิดให้นักเรียนเข้า */
 window.LESSONS = [
   { id: 1, unit: 1, no: '1.2', plan: 1, week: 1, date: '24 พ.ย. 2569', title: 'ตื่นขึ้นในโลกโค้ด', icon: 'sun', ind: ['ผลการเรียนรู้ข้อ 1'], hours: 2, mode: 'เดี่ยว', model: '5E • ทดลองก่อนเรียนไวยากรณ์', task: 'บัตรฮีโร่ และเกม “ปราบสไลม์ตัวแรก” ที่แก้เองแล้ว', star3: 'เพิ่มท่าคริติคอลให้ฮีโร่', ready: true },
-  { id: 2, unit: 2, no: '2.1', plan: 2, week: 2, date: '1 ธ.ค. 2569', title: 'คู่หูที่จำชื่อเราได้', icon: 'bot', ind: ['ผลการเรียนรู้ข้อ 2'], hours: 2, mode: 'เดี่ยว', model: '5E', task: 'NPC คู่หูที่ทักชื่อและคำนวณค่าพลังให้', star3: 'คู่หูเล่าเรื่องจากคำตอบ 5 ข้อ' },
+  { id: 2, unit: 2, no: '2.1', plan: 2, week: 2, date: '1 ธ.ค. 2569', title: 'คู่หูที่จำชื่อเราได้', icon: 'bot', ind: ['ผลการเรียนรู้ข้อ 2'], hours: 2, mode: 'เดี่ยว', model: '5E', task: 'NPC คู่หูที่ทักชื่อและคำนวณค่าพลังให้', star3: 'คู่หูเล่าเรื่องจากคำตอบ 5 ข้อ', ready: true },
   { id: 3, unit: 2, no: '2.2', plan: 3, week: 3, date: '8 ธ.ค. 2569', title: 'ดวลยามเฝ้าประตู', icon: 'swords', ind: ['ผลการเรียนรู้ข้อ 2'], hours: 2, mode: 'คู่', model: '5E • เขียนโปรแกรมคู่ (Pair Programming)', task: 'เกมดวลเป่ายิ้งฉุบ', star3: 'เพิ่มท่าไม้ตายท่าที่ 4 โดยกติกายังยุติธรรม' },
   { id: 4, unit: 2, no: '2.3', plan: 4, week: 4, date: '15 ธ.ค. 2569', title: 'วงเวทของฮีโร่', icon: 'pen-tool', ind: ['ผลการเรียนรู้ข้อ 2'], hours: 2, mode: 'เดี่ยว', model: '5E', task: 'ตราประจำตัวฮีโร่ที่วาดด้วยโค้ด (Python Turtle บน Colab)', star3: 'ลวดลายหมุนวนหลายสีด้วยลูปซ้อนลูป' },
   { id: 5, unit: 2, no: '2.4', plan: 5, week: 6, date: '29 ธ.ค. 2569', title: 'ลานประลองปัญญา', icon: 'brain', ind: ['ผลการเรียนรู้ข้อ 2', 'ผลการเรียนรู้ข้อ 5'], hours: 2, mode: 'กลุ่ม 4 คน', model: '5E • งานทีม', task: 'เกมโชว์ที่ตั้งคำถามเอง แล้วสลับให้ทีมอื่นเล่น', star3: 'เพิ่มตัวช่วยตัดตัวเลือก' },
@@ -101,10 +104,11 @@ window.BADGES = {
 };
 
 window.XP = { section: 10, widget: 15, quizPerItem: 10, lessonDone: 50, codeRun: 5 };
-window.LESSON_SECTIONS = { 1: 5 };
+window.LESSON_SECTIONS = { 1: 5, 2: 5 };
 
 window.LESSON_COMP = {
-  1: { c: ['THK', 'TEC', 'LIF'], main: [['การใช้เทคโนโลยี', 'เปิด Google Colab เขียนและรันโค้ดไพทอนบรรทัดแรกได้'], ['การคิด', 'อ่านโค้ดเกมสั้น ๆ แล้วคาดเดาว่าค่าที่แก้จะเปลี่ยนผลอย่างไร'], ['การใช้ทักษะชีวิต', 'เลือกเส้นทางการเรียนรู้ตามความสนใจของตนเอง']], attr: ['ใฝ่เรียนรู้', 'มุ่งมั่นในการทำงาน'] }
+  1: { c: ['THK', 'TEC', 'LIF'], main: [['การใช้เทคโนโลยี', 'เปิด Google Colab เขียนและรันโค้ดไพทอนบรรทัดแรกได้'], ['การคิด', 'อ่านโค้ดเกมสั้น ๆ แล้วคาดเดาว่าค่าที่แก้จะเปลี่ยนผลอย่างไร'], ['การใช้ทักษะชีวิต', 'เลือกเส้นทางการเรียนรู้ตามความสนใจของตนเอง']], attr: ['ใฝ่เรียนรู้', 'มุ่งมั่นในการทำงาน'] },
+  2: { c: ['THK', 'TEC', 'SOL'], main: [['การคิด', 'เลือกชนิดข้อมูลให้เหมาะกับค่าที่จะเก็บ และคาดเดาผลของการคำนวณ'], ['การใช้เทคโนโลยี', 'เขียนโปรแกรมรับข้อมูลจากผู้ใช้ คำนวณ และแสดงผลบน Google Colab'], ['การแก้ปัญหา', 'อ่านข้อความแจ้งข้อผิดพลาด TypeError แล้วแก้ไขโค้ดให้ทำงานได้']], attr: ['ใฝ่เรียนรู้', 'มุ่งมั่นในการทำงาน'] }
 };
 window.UNIT_TESTS = {};
 window.UNIT_INFO = {
