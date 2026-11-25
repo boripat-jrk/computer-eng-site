@@ -23,7 +23,7 @@ window.COURSE = {
 };
 /* ม.4 มี Google Classroom ห้องเดียวสำหรับทุกห้องเรียน: เลขเควส → [รหัสชั้นเรียน, รหัสงาน] */
 window.CQ_CLASS = 'ODk5OTQ2MTM4NjEx';
-window.CQ_WORK = { 1: 'ODkxNTkwMTQ3Mzkw', 2: 'ODkxNTkxMTMzNTg5' };
+window.CQ_WORK = { 1: 'ODkxNTkwMTQ3Mzkw', 2: 'ODkxNTkxMTMzNTg5', 3: 'ODkxNTkxMDc0NTk4' };
 window.CLASSROOM_WORK = (() => { const o = {}; Object.entries(CQ_WORK).forEach(([lid, aid]) => { o[lid] = {}; ROOMS.forEach(r => o[lid][r] = [CQ_CLASS, aid]); }); return o; })();
 window.NO_IPST = true;
 window.IPST_SITES = [];
